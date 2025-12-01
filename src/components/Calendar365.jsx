@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { getHeatmapColor } from '../utils/helpers';
 
 export const Calendar365 = ({ dailyStats, darkMode }) => {
+  const scrollRef = useRef(null);
+
   // Generate 300 days from today going backwards (10 months)
   const generateDays = () => {
     const days = [];
@@ -19,7 +21,8 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
         deep: stats.deep || 0,
         dayOfWeek: date.getDay(),
         month: date.getMonth(),
-        day: date.getDate()
+        day: date.getDate(),
+        isToday: i === 0
       });
     }
 
@@ -52,43 +55,52 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
   });
 
   const monthLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
-  const dayLabels = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const dayLabels = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+
+  // Auto-scroll vers le mois actuel au chargement
+  useEffect(() => {
+    if (scrollRef.current) {
+      // Scroll vers la fin (mois actuel) avec un petit délai
+      setTimeout(() => {
+        scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+      }, 100);
+    }
+  }, []);
 
   return (
-    <div className={`p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <h2 className="text-sm font-medium mb-4 uppercase tracking-wider opacity-60">
+    <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
+      <h2 className="text-xs md:text-sm font-medium mb-3 md:mb-4 uppercase tracking-wider opacity-60">
         10 derniers mois
       </h2>
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mb-4 text-xs opacity-60">
-        <span>Moins</span>
+      <div className="flex items-center gap-2 mb-3 md:mb-4 text-xs opacity-60">
+        <span className="text-[10px] md:text-xs">Moins</span>
         <div className="flex gap-1">
-          <div className={`w-3 h-3 rounded ${darkMode ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: getHeatmapColor(1, darkMode, 0) }} />
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: getHeatmapColor(2.5, darkMode, 0) }} />
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: getHeatmapColor(4, darkMode, 0) }} />
-          <div className="w-3 h-3 rounded" style={{ backgroundColor: getHeatmapColor(8, darkMode, 6) }} />
+          <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded ${darkMode ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(1, darkMode, 0) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(2.5, darkMode, 0) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(4, darkMode, 0) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(8, darkMode, 6) }} />
         </div>
-        <span>Plus</span>
+        <span className="text-[10px] md:text-xs">Plus</span>
       </div>
 
-      {/* Calendar Grid */}
-      <div className="overflow-x-auto">
+      {/* Calendar Grid - Optimisé mobile */}
+      <div ref={scrollRef} className="overflow-x-auto -mx-2 px-2" style={{ scrollBehavior: 'smooth' }}>
         <div className="inline-block min-w-full">
-          {/* Day labels */}
-          <div className="flex gap-1 mb-2">
-            <div className="w-8" /> {/* Space for day labels */}
-            <div className="flex gap-1">
+          {/* Month labels */}
+          <div className="flex gap-0.5 md:gap-1 mb-2">
+            <div className="w-6 md:w-8" /> {/* Space for day labels */}
+            <div className="flex gap-0.5 md:gap-1">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
+                <div key={weekIndex} className="flex flex-col gap-0.5 md:gap-1">
                   {week.map((day, dayIndex) => {
                     if (dayIndex === 0 && day) {
-                      // Show month label
                       const prevDay = weekIndex > 0 ? weeks[weekIndex - 1][0] : null;
                       if (!prevDay || prevDay.month !== day.month) {
                         return (
-                          <div key={`month-${weekIndex}`} className="text-xs opacity-60 h-3 mb-1">
+                          <div key={`month-${weekIndex}`} className="text-[10px] md:text-xs opacity-60 h-2.5 md:h-3 mb-0.5 md:mb-1 whitespace-nowrap">
                             {day.day <= 7 ? monthLabels[day.month] : ''}
                           </div>
                         );
@@ -102,24 +114,26 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
           </div>
 
           {/* Grid */}
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 md:gap-1">
             {/* Day of week labels */}
-            <div className="flex flex-col gap-1 text-xs opacity-60 pr-2">
+            <div className="flex flex-col gap-0.5 md:gap-1 text-[10px] md:text-xs opacity-60 pr-1 md:pr-2">
               {dayLabels.map((label, index) => (
-                <div key={index} className="h-3 flex items-center">
-                  {index % 2 === 1 ? label : ''}
+                <div key={index} className="h-2.5 md:h-3 flex items-center justify-center w-5 md:w-6">
+                  {label}
                 </div>
               ))}
             </div>
 
             {/* Weeks */}
-            <div className="flex gap-1">
+            <div className="flex gap-0.5 md:gap-1">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
+                <div key={weekIndex} className="flex flex-col gap-0.5 md:gap-1">
                   {week.map((day, dayIndex) => (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className={`w-3 h-3 rounded ${day ? 'hover:ring-2 ring-white/50 cursor-pointer' : ''}`}
+                      className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-sm ${
+                        day ? 'hover:ring-1 md:hover:ring-2 ring-white/50 cursor-pointer' : ''
+                      } ${day?.isToday ? 'ring-2 ring-green-500' : ''}`}
                       style={{
                         backgroundColor: day
                           ? getHeatmapColor(day.hours, darkMode, day.deep)
@@ -133,6 +147,11 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Swipe hint pour mobile */}
+      <div className="mt-2 text-center md:hidden">
+        <span className="text-[10px] opacity-40">← Glissez pour voir l'historique →</span>
       </div>
     </div>
   );

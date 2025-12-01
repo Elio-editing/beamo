@@ -152,9 +152,9 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
   const completedProjects = projects.filter(p => p.completed);
 
   return (
-    <div className={`p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm font-medium uppercase tracking-wider opacity-60">
+    <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
+      <div className="flex justify-between items-center mb-3 md:mb-4">
+        <h2 className="text-xs md:text-sm font-medium uppercase tracking-wider opacity-60">
           Projets
         </h2>
         <button
@@ -254,7 +254,7 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                         <Circle size={20} className="text-zinc-400" />
                       )}
                     </button>
-                    <h3 className="font-medium">{project.name}</h3>
+                    <h3 className="font-medium text-sm md:text-base truncate">{project.name}</h3>
                   </div>
                   {project.description && (
                     <p className="text-sm opacity-60 ml-7 mb-2">{project.description}</p>

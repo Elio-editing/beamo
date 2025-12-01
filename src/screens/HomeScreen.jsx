@@ -88,11 +88,11 @@ export const HomeScreen = () => {
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors`}>
       {/* Header */}
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-4xl mx-auto px-4 py-4 md:p-6">
+        <div className="flex justify-between items-center mb-4 md:mb-8">
           <div>
-            <h1 className="text-4xl font-semibold mb-1">Attention Tracker</h1>
-            <p className={`text-sm ${darkMode ? 'text-zinc-500' : 'text-zinc-600'}`}>
+            <h1 className="text-3xl md:text-4xl font-semibold mb-1">Beamo</h1>
+            <p className={`text-xs md:text-sm ${darkMode ? 'text-zinc-500' : 'text-zinc-600'}`}>
               Deep Work & Shallow Work
             </p>
           </div>

@@ -1,6 +1,6 @@
 {
-  "name": "Attention Tracker",
-  "short_name": "Attention",
+  "name": "Beamo",
+  "short_name": "Beamo",
   "description": "Track your Deep Work and Shallow Work sessions",
   "start_url": "/",
   "display": "standalone",
