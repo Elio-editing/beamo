@@ -1,0 +1,41 @@
+{
+  "name": "Attention Tracker",
+  "short_name": "Attention",
+  "description": "Track your Deep Work and Shallow Work sessions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#22c55e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Start Deep Work",
+      "short_name": "Deep Work",
+      "description": "Start a deep work session",
+      "url": "/?session=deep",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Start Shallow Work",
+      "short_name": "Shallow Work",
+      "description": "Start a shallow work session",
+      "url": "/?session=shallow",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
