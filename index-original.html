@@ -1,0 +1,3915 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attention Tracker v3.0 + Jarvis AI</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Deep Work & Shallow Work Tracker - Basé sur les recherches scientifiques">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Attention">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fafaf8;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode {
+            background: #0a0a0a;
+            color: #e8e8e6;
+        }
+        
+        body.dark-mode .title {
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .subtitle {
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .card {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+        }
+        
+        body.dark-mode .metric-value,
+        body.dark-mode .stat-value {
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .gauge-container {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+        
+        body.dark-mode .calendar-day.empty {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+        }
+        
+        body.dark-mode .input {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+            color: #e8e8e6;
+        }
+        
+        body.dark-mode .session-item {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+        
+        body.dark-mode .info-box {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+        
+        body.dark-mode .stat-item {
+            border-left-color: #fafaf8;
+        }
+        
+        body.dark-mode .section-label {
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .stat-label {
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .calendar-legend {
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .legend-box {
+            border-color: #3a3a3a;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 24px 120px;
+        }
+        
+        .header {
+            margin-bottom: 64px;
+        }
+        
+        .title {
+            font-size: 56px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+            color: #0a0a0a;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            color: #737373;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+        
+        .card {
+            background: #ffffff;
+            border: 1px solid #e8e8e6;
+            padding: 40px;
+            margin-bottom: 24px;
+        }
+        
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #737373;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 16px;
+        }
+        
+        .metric-value {
+            font-size: 48px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+            color: #0a0a0a;
+        }
+        
+        .metric-value.warning {
+            color: #0a0a0a;
+        }
+        
+        .gauge-container {
+            width: 100%;
+            height: 12px;
+            background: #f5f5f3;
+            position: relative;
+            margin-bottom: 32px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e8e8e6;
+        }
+        
+        .gauge-fill {
+            height: 100%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+        }
+        
+        .gauge-fill.good {
+            background: linear-gradient(90deg, #1a4d2e 0%, #2d6a4f 100%);
+            box-shadow: 0 2px 8px rgba(26, 77, 46, 0.25);
+        }
+        
+        .gauge-fill.warning {
+            background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 100%);
+            box-shadow: 0 2px 8px rgba(127, 29, 29, 0.25);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        
+        .stat-item {
+            border-left: 2px solid #0a0a0a;
+            padding-left: 20px;
+        }
+        
+        .stat-value {
+            font-size: 40px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 8px;
+            color: #0a0a0a;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #737373;
+            font-weight: 400;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-rows: repeat(7, minmax(12px, 1fr)); /* 7 rangées pour 7 jours de la semaine */
+            grid-auto-flow: column; /* Remplir colonne par colonne, de haut en bas */
+            gap: 3px;
+            max-width: 100%;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 1px solid #e8e8e6;
+            border-radius: 2px;
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            background: #fafaf8;
+        }
+        
+        .calendar-day:hover {
+            transform: scale(1.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            z-index: 10;
+        }
+        
+        .calendar-day.optimal {
+            background: #1a4d2e;
+            border-color: #1a4d2e;
+        }
+        
+        .calendar-day.overwork {
+            background: #7f1d1d;
+            border-color: #7f1d1d;
+        }
+        
+        .calendar-day.underwork {
+            background: #d97706;
+            border-color: #d97706;
+        }
+
+        .calendar-day.minimal {
+            background: #3a3a38;
+            border-color: #3a3a38;
+        }
+
+        .calendar-day.empty {
+            background: #fafaf8;
+        }
+        
+        .calendar-legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #737373;
+            font-weight: 400;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #e8e8e6;
+            border-radius: 3px;
+        }
+        
+        .legend-box.optimal {
+            background: #1a4d2e;
+            border-color: #1a4d2e;
+        }
+        
+        .legend-box.overwork {
+            background: #7f1d1d;
+            border-color: #7f1d1d;
+        }
+        
+        .legend-box.underwork {
+            background: #d97706;
+            border-color: #d97706;
+        }
+
+        .legend-box.minimal {
+            background: #3a3a38;
+            border-color: #3a3a38;
+        }
+
+        .timer {
+            text-align: center;
+            margin: 48px 0;
+        }
+        
+        .timer-display {
+            font-size: 80px;
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 40px;
+            color: #0a0a0a;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        
+        .button {
+            padding: 16px 40px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            border: 2px solid #0a0a0a;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-transform: uppercase;
+            background: transparent;
+            color: #0a0a0a;
+        }
+        
+        .button-primary {
+            background: #0a0a0a;
+            color: #fafaf8;
+        }
+        
+        .button-primary:hover:not(:disabled) {
+            background: #2a2a2a;
+            border-color: #2a2a2a;
+            transform: translateY(-1px);
+        }
+        
+        .button-primary:disabled {
+            background: #e8e8e6;
+            color: #a3a3a3;
+            border-color: #e8e8e6;
+            cursor: not-allowed;
+        }
+        
+        .button-secondary {
+            background: transparent;
+            color: #0a0a0a;
+            border: 2px solid #0a0a0a;
+        }
+        
+        .button-secondary:hover {
+            background: #0a0a0a;
+            color: #fafaf8;
+        }
+        
+        .button.active {
+            background: #0a0a0a;
+            color: #fafaf8;
+        }
+        
+        .manual-entry {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 2px solid #f5f5f3;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e8e8e6;
+            font-size: 15px;
+            font-family: inherit;
+            font-variant-numeric: tabular-nums;
+            font-weight: 400;
+            transition: border-color 0.2s;
+            background: #fafaf8;
+            color: #0a0a0a;
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: #0a0a0a;
+            background: #ffffff;
+        }
+        
+        /* Style minimaliste pour le select de projet */
+        .project-select {
+            flex: 1;
+            padding: 12px 16px;
+            padding-right: 40px;
+            border: 1px solid #d4d4d2;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 400;
+            background-color: #fafaf8;
+            color: #525252;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23737373' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 10px 6px;
+        }
+        
+        .project-select:hover {
+            border-color: #a3a3a3;
+            background-color: #ffffff;
+        }
+        
+        .project-select:focus {
+            outline: none;
+            border-color: #525252;
+            background-color: #ffffff;
+        }
+        
+        body.dark-mode .project-select {
+            background-color: #1a1a1a;
+            border-color: #3a3a38;
+            color: #d4d4d2;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23a3a3a3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        }
+        
+        body.dark-mode .project-select:hover {
+            border-color: #525252;
+            background-color: #262626;
+        }
+        
+        body.dark-mode .project-select:focus {
+            border-color: #737373;
+            background-color: #ffffff;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: opacity(0.6);
+        }
+        
+        body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) opacity(0.6);
+        }
+        
+        .input-hint {
+            font-size: 12px;
+            color: #a3a3a3;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+        
+        .alert {
+            margin-top: 32px;
+            padding: 24px;
+            border-left: 3px solid #0a0a0a;
+            background: #f5f5f3;
+        }
+        
+        .alert-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 0.01em;
+            color: #0a0a0a;
+        }
+        
+        .alert-content {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #525252;
+        }
+        
+        .alert-list {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+        
+        .alert-list li {
+            margin-bottom: 6px;
+        }
+        
+        .session-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: #fafaf8;
+            border: 1px solid #e8e8e6;
+            transition: all 0.2s;
+        }
+        
+        .session-item:hover {
+            background: #f5f5f3;
+        }
+        
+        .session-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .session-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #0a0a0a;
+            font-weight: 600;
+            min-width: 80px;
+        }
+        
+        .session-time {
+            font-size: 13px;
+            color: #737373;
+            font-weight: 400;
+            min-width: 140px;
+        }
+        
+        .session-duration {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0a0a0a;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .session-badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: #f5f5f3;
+            color: #737373;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px solid #e8e8e6;
+        }
+        
+        .delete-button {
+            background: none;
+            border: 1px solid #e8e8e6;
+            color: #a3a3a3;
+            padding: 6px 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+        
+        .delete-button:hover {
+            border-color: #0a0a0a;
+            color: #0a0a0a;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 28px;
+        }
+        
+        .button-text {
+            background: none;
+            border: none;
+            color: #737373;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+        
+        .button-text:hover {
+            color: #0a0a0a;
+        }
+        
+        .dark-mode-toggle {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            background: #0a0a0a;
+            color: #fafaf8;
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+        
+        body.dark-mode .dark-mode-toggle {
+            background: #fafaf8;
+            color: #0a0a0a;
+        }
+        
+        .day-separator {
+            margin: 24px 0;
+            padding: 12px 0;
+            border-bottom: 2px solid #e8e8e6;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0a0a0a;
+            letter-spacing: 0.02em;
+        }
+        
+        body.dark-mode .day-separator {
+            border-bottom-color: #3a3a3a;
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .timer-display {
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .button {
+            border-color: #fafaf8;
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .button-primary {
+            background: #fafaf8;
+            color: #0a0a0a;
+            border-color: #fafaf8;
+        }
+        
+        body.dark-mode .button-primary:hover:not(:disabled) {
+            background: #e8e8e6;
+            border-color: #e8e8e6;
+        }
+        
+        body.dark-mode .button-secondary {
+            background: transparent;
+            color: #fafaf8;
+            border-color: #fafaf8;
+        }
+        
+        body.dark-mode .button-secondary:hover {
+            background: #fafaf8;
+            color: #0a0a0a;
+        }
+        
+        body.dark-mode .button.active {
+            background: #fafaf8;
+            color: #0a0a0a;
+        }
+        
+        body.dark-mode .delete-button {
+            border-color: #3a3a3a;
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .delete-button:hover {
+            border-color: #fafaf8;
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .session-type,
+        body.dark-mode .session-duration {
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .session-badge {
+            background: #2a2a2a;
+            border-color: #3a3a3a;
+        }
+        
+        body.dark-mode .manual-entry {
+            border-top-color: #2a2a2a;
+        }
+        
+        body.dark-mode .alert {
+            background: #2a2a2a;
+            border-left-color: #fafaf8;
+        }
+        
+        body.dark-mode .button-text {
+            color: #a3a3a3;
+        }
+        
+        body.dark-mode .button-text:hover {
+            color: #fafaf8;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 0;
+            color: #a3a3a3;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .info-box {
+            font-size: 13px;
+            color: #525252;
+            padding: 16px;
+            background: #fafaf8;
+            margin-bottom: 32px;
+            border: 1px solid #e8e8e6;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #0a0a0a;
+            font-weight: 600;
+        }
+        
+        body.dark-mode .info-box strong {
+            color: #fafaf8;
+        }
+        
+        body.dark-mode .info-box {
+            color: #a3a3a3;
+        }
+
+        /* Todo Pair Styles */
+        .todo-pair {
+            background: #ffffff;
+            border: 2px solid #e8e8e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        body.dark-mode .todo-pair {
+            background: #1a1a1a;
+            border-color: #2a2a2a;
+        }
+
+        .todo-pair.current {
+            border-color: #1a4d2e;
+            box-shadow: 0 2px 8px rgba(26, 77, 46, 0.1);
+        }
+
+        body.dark-mode .todo-pair.current {
+            border-color: #2d6a4f;
+        }
+
+        .todo-pair-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e8e8e6;
+        }
+
+        body.dark-mode .todo-pair-header {
+            border-bottom-color: #2a2a2a;
+        }
+
+        .todo-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0a0a0a;
+        }
+
+        body.dark-mode .todo-date {
+            color: #fafaf8;
+        }
+
+        .todo-badge {
+            font-size: 11px;
+            padding: 4px 10px;
+            background: #1a4d2e;
+            color: #fafaf8;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .todo-task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 15px;
+        }
+
+        .todo-task input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .todo-task.completed span {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .todo-task .delete-task {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #a3a3a3;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .todo-task:hover .delete-task {
+            opacity: 1;
+        }
+
+        .todo-task .delete-task:hover {
+            color: #7f1d1d;
+        }
+
+        .todo-input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .todo-input-group input {
+            flex: 1;
+        }
+
+        /* Jarvis AI Card Styles */
+        .jarvis-card {
+            background: linear-gradient(135deg, #1a4d2e 0%, #0a2818 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            color: #fafaf8;
+            box-shadow: 0 4px 12px rgba(26, 77, 46, 0.2);
+        }
+
+        .dark-mode .jarvis-card {
+            background: linear-gradient(135deg, #1a4d2e 0%, #0a2818 100%);
+        }
+
+        .jarvis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .jarvis-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .jarvis-title span:first-child {
+            font-size: 24px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .mode-toggle button {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .mode-toggle button:hover {
+            color: #fafaf8;
+        }
+
+        .mode-toggle button.active {
+            background: rgba(255,255,255,0.2);
+            color: #fafaf8;
+        }
+
+        .insights-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border-left: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .insight-item.achievement {
+            border-left-color: #4ade80;
+        }
+
+        .insight-item.alert {
+            border-left-color: #ef4444;
+        }
+
+        .insight-item.pattern {
+            border-left-color: #fbbf24;
+        }
+
+        .insight-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .insight-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .jarvis-button {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            color: #fafaf8;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .jarvis-button:hover:not(:disabled) {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .jarvis-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quota-display {
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .input {
+            padding: 10px 14px;
+            border: 1px solid #e8e8e6;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #1a4d2e;
+            box-shadow: 0 0 0 3px rgba(26, 77, 46, 0.1);
+        }
+
+        .dark-mode .input {
+            background: #1a1a1a;
+            border-color: #333333;
+            color: #fafaf8;
+        }
+
+        .dark-mode .input:focus {
+            border-color: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+        }
+
+        /* Voice Controls Styles */
+        .voice-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .mic-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: #fafaf8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mic-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .mic-button.listening {
+            background: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .voice-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .voice-toggle:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .voice-toggle input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .listening-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: #fafaf8;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wave {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .wave span {
+            display: inline-block;
+            width: 3px;
+            height: 12px;
+            background: #fafaf8;
+            border-radius: 2px;
+            animation: wave 1s infinite ease-in-out;
+        }
+
+        .wave span:nth-child(1) { animation-delay: 0s; }
+        .wave span:nth-child(2) { animation-delay: 0.1s; }
+        .wave span:nth-child(3) { animation-delay: 0.2s; }
+        .wave span:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes wave {
+            0%, 100% { height: 8px; }
+            50% { height: 16px; }
+        }
+
+        .voice-select {
+            flex: 1;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: #fafaf8;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .voice-select option {
+            background: #1a1a1a;
+            color: #fafaf8;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ===== JARVIS OFFLINE ANALYTICS =====
+        const JarvisOfflineAnalytics = {
+            calculatePatterns: (sessions) => {
+                if (!sessions || sessions.length === 0) {
+                    return {
+                        bestTimeOfDay: { morning: 0, afternoon: 0, evening: 0 },
+                        averages: { dailyDeep: 0, dailyShallow: 0, weeklyDeep: 0, weeklyShallow: 0 },
+                        streaks: { currentOptimal: 0, longestOptimal: 0, currentNoWork: 0 },
+                        trends: { deepWorkChange: 0, shallowWorkChange: 0, totalChange: 0 }
+                    };
+                }
+
+                // Calcul du meilleur moment de la journée
+                const morningHours = sessions.filter(s => {
+                    const hour = new Date(s.start).getHours();
+                    return hour >= 6 && hour < 12;
+                }).reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                const afternoonHours = sessions.filter(s => {
+                    const hour = new Date(s.start).getHours();
+                    return hour >= 12 && hour < 18;
+                }).reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                const eveningHours = sessions.filter(s => {
+                    const hour = new Date(s.start).getHours();
+                    return hour >= 18 || hour < 6;
+                }).reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                // Calcul des moyennes
+                const last30Days = sessions.filter(s => {
+                    const daysDiff = (Date.now() - s.start) / (1000 * 60 * 60 * 24);
+                    return daysDiff <= 30;
+                });
+
+                const deepTotal = last30Days.filter(s => s.type === 'deep').reduce((sum, s) => sum + s.duration, 0) / 3600;
+                const shallowTotal = last30Days.filter(s => s.type === 'shallow').reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                const daysWithWork = new Set(last30Days.map(s => new Date(s.start).toDateString())).size;
+                const dailyDeep = daysWithWork > 0 ? deepTotal / daysWithWork : 0;
+                const dailyShallow = daysWithWork > 0 ? shallowTotal / daysWithWork : 0;
+
+                return {
+                    bestTimeOfDay: { morning: morningHours, afternoon: afternoonHours, evening: eveningHours },
+                    averages: { dailyDeep, dailyShallow, weeklyDeep: dailyDeep * 7, weeklyShallow: dailyShallow * 7 },
+                    streaks: { currentOptimal: 0, longestOptimal: 0, currentNoWork: 0 },
+                    trends: { deepWorkChange: 0, shallowWorkChange: 0, totalChange: 0 }
+                };
+            },
+
+            generateInsights: (patterns, sessions, projects) => {
+                const insights = [];
+
+                if (!sessions || sessions.length === 0) {
+                    insights.push({
+                        type: 'info',
+                        icon: '👋',
+                        message: 'Commence à tracker tes sessions de travail !'
+                    });
+                    return insights;
+                }
+
+                // Insight sur le meilleur moment
+                const { morning, afternoon, evening } = patterns.bestTimeOfDay;
+                if (morning > afternoon && morning > evening) {
+                    insights.push({
+                        type: 'pattern',
+                        icon: '🌅',
+                        message: `Tu es plus productif le matin (+${Math.round(((morning / Math.max(afternoon, evening, 1)) - 1) * 100)}%)`
+                    });
+                } else if (afternoon > morning && afternoon > evening) {
+                    insights.push({
+                        type: 'pattern',
+                        icon: '☀️',
+                        message: `Tu es plus productif l'après-midi (+${Math.round(((afternoon / Math.max(morning, evening, 1)) - 1) * 100)}%)`
+                    });
+                }
+
+                // Insight sur les moyennes
+                const OPTIMAL_DEEP_MIN = 3;
+                if (patterns.averages.dailyDeep >= OPTIMAL_DEEP_MIN) {
+                    insights.push({
+                        type: 'achievement',
+                        icon: '🎯',
+                        message: `Moyenne de ${patterns.averages.dailyDeep.toFixed(1)}h de deep work par jour`
+                    });
+                } else if (patterns.averages.dailyDeep > 0) {
+                    insights.push({
+                        type: 'info',
+                        icon: '📊',
+                        message: `Objectif : atteindre ${OPTIMAL_DEEP_MIN}h de deep work quotidien`
+                    });
+                }
+
+                // Insight sur les projets en retard
+                if (projects) {
+                    const overdueProjects = projects.filter(p => {
+                        if (!p.deadline || p.completed) return false;
+                        return new Date(p.deadline) < new Date();
+                    });
+
+                    if (overdueProjects.length > 0) {
+                        insights.push({
+                            type: 'alert',
+                            icon: '⚠️',
+                            message: `${overdueProjects.length} projet${overdueProjects.length > 1 ? 's' : ''} en retard`
+                        });
+                    }
+                }
+
+                return insights;
+            }
+        };
+
+        // ===== JARVIS ONLINE API =====
+        const JarvisOnlineAPI = {
+            API_ENDPOINT: 'https://api.anthropic.com/v1/messages',
+            MODEL: 'claude-3-5-sonnet-20241022',  // Claude 3.5 Sonnet latest
+            COSTS: { input: 3, output: 15 },
+
+            calculateCost: (inputTokens, outputTokens) => {
+                const inputCost = (inputTokens / 1000000) * JarvisOnlineAPI.COSTS.input;
+                const outputCost = (outputTokens / 1000000) * JarvisOnlineAPI.COSTS.output;
+                return inputCost + outputCost;
+            },
+
+            askJarvis: async (question, context, apiKey) => {
+                if (!apiKey) {
+                    return { error: 'API key manquante. Configure-la dans les paramètres.' };
+                }
+
+                try {
+                    const systemPrompt = `Tu es Jarvis, l'assistant IA personnel pour Attention Tracker.
+
+Ton rôle :
+- Analyser les données de productivité de l'utilisateur
+- Donner des insights personnalisés et actionnables
+- Répondre aux questions sur les patterns de travail
+- Recommander des améliorations basées sur la science (Cal Newport, Deep Work)
+
+Données de contexte :
+${JSON.stringify(context, null, 2)}
+
+Réponds de manière concise (2-3 phrases max), amicale et directe en français.`;
+
+                    console.log('🔵 Envoi de la requête à Claude API...');
+
+                    const response = await fetch(JarvisOnlineAPI.API_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01'
+                        },
+                        body: JSON.stringify({
+                            model: JarvisOnlineAPI.MODEL,
+                            max_tokens: 300,
+                            system: systemPrompt,
+                            messages: [
+                                { role: 'user', content: question }
+                            ]
+                        })
+                    });
+
+                    console.log('📡 Réponse reçue, status:', response.status);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('❌ Erreur API:', response.status, errorText);
+                        throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('✅ Réponse parsée avec succès');
+
+                    return {
+                        message: data.content[0].text,
+                        tokens: data.usage,
+                        cost: JarvisOnlineAPI.calculateCost(data.usage.input_tokens, data.usage.output_tokens)
+                    };
+                } catch (error) {
+                    console.error('🔴 Erreur complète:', error);
+                    return { error: `Connexion échouée: ${error.message}. Vérifie ton API key et ta connexion internet.` };
+                }
+            }
+        };
+
+        // ===== TWO DAY TODO MANAGER =====
+        const createNewPair = (startDate = null) => {
+            const start = startDate ? new Date(startDate) : new Date();
+            const end = new Date(start);
+            end.setDate(end.getDate() + 1);
+
+            return {
+                id: Date.now(),
+                startDate: start.toISOString().split('T')[0],
+                endDate: end.toISOString().split('T')[0],
+                tasks: [],
+                completed: false,
+                archived: false
+            };
+        };
+
+        const getCurrentPair = (todos) => {
+            const today = new Date().toISOString().split('T')[0];
+
+            let current = todos.find(pair =>
+                !pair.archived &&
+                pair.startDate <= today &&
+                pair.endDate >= today
+            );
+
+            if (!current) {
+                current = createNewPair();
+                todos.push(current);
+            }
+
+            return current;
+        };
+
+        const archiveExpiredPairs = (todos) => {
+            const today = new Date().toISOString().split('T')[0];
+
+            return todos.map(pair => {
+                if (pair.endDate < today && !pair.archived) {
+                    return { ...pair, archived: true };
+                }
+                return pair;
+            });
+        };
+
+        function AttentionTracker() {
+            // Constantes basées sur les recherches scientifiques (Cal Newport, Anders Ericsson)
+            const MAX_DEEP_WORK_HOURS = 4;      // 4h max de deep work par jour (standard)
+            const MAX_SHALLOW_WORK_HOURS = 4;   // Jusqu'à 4h de shallow work recommandé
+            const TOTAL_OPTIMAL_HOURS = 8;       // Total optimal de travail par jour
+            const OPTIMAL_DEEP_MIN = 3;          // Minimum de deep work pour être optimal
+            const OPTIMAL_DEEP_MAX = 4;        // Maximum de deep work recommandé
+            
+            // Calcul de fatigue : basé sur 8h de travail = 100% d'épuisement
+            // Deep work : 1h = 12.5% de fatigue (4h = 50%)
+            // Shallow work : 1h = 6.25% de fatigue (4h = 25%)
+            // Total 8h = 75% de fatigue max (on garde 25% de réserve)
+            const DEEP_WORK_DRAIN_PER_HOUR = 12.5;    // 1h deep = 12.5% de fatigue
+            const SHALLOW_WORK_DRAIN_PER_HOUR = 6.25; // 1h shallow = 6.25% de fatigue
+            const RECOVERY_RATE_PER_HOUR = 12.5;      // Récupération : 8h de sommeil = 100%
+            const RECOVERY_THRESHOLD_HOURS = 3;       // Seuil minimum : 3h sans travailler pour récupérer
+            
+            const [isTracking, setIsTracking] = useState(false);
+            const [isPaused, setIsPaused] = useState(false);
+            const [pausedTime, setPausedTime] = useState(0);
+            const [pauseStartTime, setPauseStartTime] = useState(null);
+            const [currentSession, setCurrentSession] = useState(null);
+            const [pendingSession, setPendingSession] = useState(null); // Session en attente de validation
+            const [sessions, setSessions] = useState([]);
+            const [todayDeepWork, setTodayDeepWork] = useState(0);
+            const [todayShallowWork, setTodayShallowWork] = useState(0);
+            const [workType, setWorkType] = useState('deep'); // 'deep' ou 'shallow'
+            const [attentionLevel, setAttentionLevel] = useState(100);
+            const [lastUpdate, setLastUpdate] = useState(Date.now());
+            const [lastSessionEnd, setLastSessionEnd] = useState(null); // Timestamp de fin de dernière session
+            const [showManualEntry, setShowManualEntry] = useState(false);
+            const [manualMinutes, setManualMinutes] = useState('');
+            const [manualDate, setManualDate] = useState('');
+            const [dailyStats, setDailyStats] = useState({});
+            const [darkMode, setDarkMode] = useState(false);
+            
+            // États pour les projets
+            const [projects, setProjects] = useState([]);
+            const [showProjectForm, setShowProjectForm] = useState(false);
+            const [showCompletedProjects, setShowCompletedProjects] = useState(false);
+            const [showPausedProjects, setShowPausedProjects] = useState(false);
+            const [editingProject, setEditingProject] = useState(null);
+            const [selectedProjectForSession, setSelectedProjectForSession] = useState(null);
+            const [selectedProjectForManual, setSelectedProjectForManual] = useState(null);
+            const [newProject, setNewProject] = useState({
+                name: '',
+                deadline: '',
+                subtasks: []
+            });
+            const [newSubtask, setNewSubtask] = useState('');
+            const [editingDeadlineId, setEditingDeadlineId] = useState(null);
+            const [tempDeadline, setTempDeadline] = useState('');
+
+            // États pour To-Do par paires de 2 jours
+            const [twoDayTodos, setTwoDayTodos] = useState([]);
+            const [todoInput, setTodoInput] = useState('');
+            const [showArchivedTodos, setShowArchivedTodos] = useState(false);
+
+            // États pour Jarvis AI Analytics
+            const [jarvisMode, setJarvisMode] = useState('offline');
+            const [jarvisApiKey, setJarvisApiKey] = useState(null);
+            const [jarvisInsights, setJarvisInsights] = useState([]);
+            const [jarvisQuota, setJarvisQuota] = useState({ used: 0, limit: 100, cost: 0 });
+            const [jarvisChatInput, setJarvisChatInput] = useState('');
+            const [jarvisChatMessages, setJarvisChatMessages] = useState([]);
+            const [jarvisLoading, setJarvisLoading] = useState(false);
+
+            // États pour le graphique mensuel
+            const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+            const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+            const chartRef = React.useRef(null);
+            const chartInstanceRef = React.useRef(null);
+
+            // États pour Speech-to-Speech
+            const [isListening, setIsListening] = useState(false);
+            const [voiceEnabled, setVoiceEnabled] = useState(true);
+            const [selectedVoice, setSelectedVoice] = useState(null);
+            const [availableVoices, setAvailableVoices] = useState([]);
+            const [recognition, setRecognition] = useState(null);
+            const [voiceInputReceived, setVoiceInputReceived] = useState(false);
+
+            useEffect(() => {
+                const saved = localStorage.getItem('attentionDataV3');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    setSessions(data.sessions || []);
+                    setProjects(data.projects || []);
+                    setLastUpdate(data.lastUpdate || Date.now());
+                    setLastSessionEnd(data.lastSessionEnd || null);
+                    setDarkMode(data.darkMode || false);
+
+                    // Recalculer TOUTES les stats quotidiennes à partir des sessions
+                    const allSessions = data.sessions || [];
+                    const recalculatedStats = {};
+
+                    // Grouper les sessions par jour
+                    const sessionsByDay = {};
+                    allSessions.forEach(session => {
+                        const date = new Date(session.start);
+                        const dateKey = date.toISOString().split('T')[0];
+                        if (!sessionsByDay[dateKey]) {
+                            sessionsByDay[dateKey] = [];
+                        }
+                        sessionsByDay[dateKey].push(session);
+                    });
+
+                    // Calculer les stats pour chaque jour
+                    Object.keys(sessionsByDay).forEach(dateKey => {
+                        const daySessions = sessionsByDay[dateKey];
+                        const dayDeepTotal = daySessions
+                            .filter(s => s.type === 'deep')
+                            .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                        const dayShallowTotal = daySessions
+                            .filter(s => s.type === 'shallow')
+                            .reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                        const totalHours = dayDeepTotal + dayShallowTotal;
+
+                        if (dayDeepTotal >= OPTIMAL_DEEP_MIN && dayDeepTotal <= OPTIMAL_DEEP_MAX && totalHours <= TOTAL_OPTIMAL_HOURS) {
+                            recalculatedStats[dateKey] = 'optimal';
+                        } else if (dayDeepTotal > OPTIMAL_DEEP_MAX || totalHours > 9) {
+                            recalculatedStats[dateKey] = 'overwork';
+                        } else if (totalHours >= 4) {
+                            // ≥ 4h de travail total mais deep work insuffisant → orange
+                            recalculatedStats[dateKey] = 'underwork';
+                        } else if (totalHours > 0) {
+                            // < 4h de travail total → gris (minimal)
+                            recalculatedStats[dateKey] = 'minimal';
+                        }
+                    });
+
+                    setDailyStats(recalculatedStats);
+
+                    // Recalculer les totaux du jour
+                    const today = new Date().toDateString();
+                    const todaySessions = allSessions.filter(s =>
+                        new Date(s.start).toDateString() === today
+                    );
+
+                    const deepTotal = todaySessions
+                        .filter(s => s.type === 'deep')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                    const shallowTotal = todaySessions
+                        .filter(s => s.type === 'shallow')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+
+                    setTodayDeepWork(deepTotal);
+                    setTodayShallowWork(shallowTotal);
+
+                    // Recalculer la fatigue basée sur le travail d'aujourd'hui
+                    const totalDrain = (deepTotal * DEEP_WORK_DRAIN_PER_HOUR) + (shallowTotal * SHALLOW_WORK_DRAIN_PER_HOUR);
+
+                    // Vérifier s'il y a eu récupération depuis la dernière mise à jour
+                    const now = Date.now();
+                    const lastUpdateTime = data.lastUpdate || Date.now();
+                    const hoursPassed = (now - lastUpdateTime) / (1000 * 60 * 60);
+                    const recovery = hoursPassed * RECOVERY_RATE_PER_HOUR;
+
+                    const currentLevel = Math.max(0, 100 - totalDrain);
+                    const recoveredLevel = Math.min(100, currentLevel + recovery);
+
+                    setAttentionLevel(recoveredLevel);
+
+                    // Charger et archiver les todos
+                    if (data.twoDayTodos) {
+                        const archivedTodos = archiveExpiredPairs(data.twoDayTodos);
+                        setTwoDayTodos(archivedTodos);
+                    } else {
+                        // Créer première paire si aucune
+                        setTwoDayTodos([createNewPair()]);
+                    }
+
+                    // Charger données Jarvis
+                    if (data.jarvis) {
+                        setJarvisMode(data.jarvis.mode || 'offline');
+                        setJarvisApiKey(data.jarvis.apiKey || null);
+                        setJarvisQuota(data.jarvis.quota || { used: 0, limit: 100, cost: 0 });
+                        setJarvisChatMessages(data.jarvis.conversationHistory || []);
+                    }
+                }
+            }, []);
+
+            useEffect(() => {
+                const data = {
+                    sessions,
+                    projects,
+                    attentionLevel,
+                    lastUpdate,
+                    lastSessionEnd,
+                    dailyStats,
+                    darkMode,
+                    twoDayTodos,
+                    jarvis: {
+                        mode: jarvisMode,
+                        apiKey: jarvisApiKey,
+                        quota: jarvisQuota,
+                        conversationHistory: jarvisChatMessages.slice(-20) // Garder seulement les 20 derniers
+                    }
+                };
+                localStorage.setItem('attentionDataV3', JSON.stringify(data));
+
+                // Appliquer la classe dark-mode au body
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            }, [sessions, projects, attentionLevel, lastUpdate, lastSessionEnd, dailyStats, darkMode, twoDayTodos, jarvisMode, jarvisApiKey, jarvisQuota, jarvisChatMessages]);
+
+            // Calculer insights Jarvis offline
+            useEffect(() => {
+                const patterns = JarvisOfflineAnalytics.calculatePatterns(sessions);
+                const insights = JarvisOfflineAnalytics.generateInsights(patterns, sessions, projects);
+                setJarvisInsights(insights);
+            }, [sessions, projects]);
+
+            // Initialiser et mettre à jour le graphique Chart.js
+            useEffect(() => {
+                if (!chartRef.current) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                const data = prepareMonthData(selectedYear, selectedMonth);
+
+                // Détruire l'ancien graphique s'il existe
+                if (chartInstanceRef.current) {
+                    chartInstanceRef.current.destroy();
+                }
+
+                // Créer le nouveau graphique
+                chartInstanceRef.current = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2.5,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                grid: {
+                                    color: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+                                },
+                                ticks: {
+                                    color: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'
+                                },
+                                ticks: {
+                                    color: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                                    callback: function(value) {
+                                        return value + 'h';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    color: darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)',
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = context.parsed.y.toFixed(1);
+                                        return label + ': ' + value + 'h';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstanceRef.current) {
+                        chartInstanceRef.current.destroy();
+                    }
+                };
+            }, [sessions, selectedMonth, selectedYear, darkMode]);
+
+            // Initialiser Speech Recognition et charger les voix
+            useEffect(() => {
+                // Charger les voix disponibles pour Text-to-Speech
+                const loadVoices = () => {
+                    const voices = window.speechSynthesis.getVoices();
+                    const frenchVoices = voices.filter(v => v.lang.startsWith('fr'));
+                    setAvailableVoices(frenchVoices);
+
+                    // Sélectionner la voix par défaut (Thomas sur macOS)
+                    const defaultVoice = frenchVoices.find(v => v.name.includes('Thomas')) || frenchVoices[0];
+                    setSelectedVoice(defaultVoice);
+                };
+
+                // Charger les voix au démarrage et quand elles changent
+                loadVoices();
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = loadVoices;
+                }
+
+                // Initialiser Web Speech Recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    const recognitionInstance = new SpeechRecognition();
+                    recognitionInstance.lang = 'fr-FR';
+                    recognitionInstance.continuous = false;
+                    recognitionInstance.interimResults = false;
+                    recognitionInstance.maxAlternatives = 1;
+
+                    recognitionInstance.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        setJarvisChatInput(transcript);
+                        setIsListening(false);
+                        setVoiceInputReceived(true); // Marquer qu'on a reçu un input vocal
+                    };
+
+                    recognitionInstance.onerror = (event) => {
+                        console.error('Erreur de reconnaissance vocale:', event.error);
+
+                        // Ignorer certaines erreurs qui ne sont pas critiques
+                        if (event.error === 'aborted' || event.error === 'no-speech') {
+                            // Ces erreurs sont normales quand l'utilisateur arrête ou ne parle pas
+                            setIsListening(false);
+                            return;
+                        }
+
+                        // Afficher un message pour les vraies erreurs
+                        if (event.error === 'not-allowed') {
+                            alert("Permission d'accès au microphone refusée. Veuillez autoriser l'accès au microphone.");
+                        } else if (event.error === 'network') {
+                            alert("Erreur réseau. Vérifiez votre connexion internet.");
+                        }
+
+                        setIsListening(false);
+                    };
+
+                    recognitionInstance.onend = () => {
+                        setIsListening(false);
+                    };
+
+                    setRecognition(recognitionInstance);
+                }
+            }, []);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    if (!isTracking && attentionLevel < 100) {
+                        // Vérifier le seuil de récupération (3h minimum sans travailler)
+                        if (lastSessionEnd) {
+                            const now = Date.now();
+                            const hoursSinceLastSession = (now - lastSessionEnd) / (1000 * 60 * 60);
+
+                            // Récupération uniquement si >= 3h sans travailler
+                            if (hoursSinceLastSession >= RECOVERY_THRESHOLD_HOURS) {
+                                const hoursPassed = (now - lastUpdate) / (1000 * 60 * 60);
+                                const recovery = hoursPassed * RECOVERY_RATE_PER_HOUR;
+
+                                setAttentionLevel(prev => Math.min(100, prev + recovery));
+                                setLastUpdate(now);
+                            }
+                        }
+                    }
+                }, 60000);
+
+                return () => clearInterval(interval);
+            }, [isTracking, attentionLevel, lastUpdate, lastSessionEnd]);
+
+            useEffect(() => {
+                if (isTracking && currentSession) {
+                    const timer = setInterval(() => {
+                        const elapsed = (Date.now() - currentSession.start) / 1000;
+                        const hoursElapsed = elapsed / 3600;
+                        
+                        // Calcul de la fatigue actuelle de cette session
+                        const drainRate = workType === 'deep' ? DEEP_WORK_DRAIN_PER_HOUR : SHALLOW_WORK_DRAIN_PER_HOUR;
+                        const currentSessionDrain = hoursElapsed * drainRate;
+                        
+                        // Calcul de la fatigue totale de la journée (sans cette session)
+                        const deepDrain = todayDeepWork * DEEP_WORK_DRAIN_PER_HOUR;
+                        const shallowDrain = todayShallowWork * SHALLOW_WORK_DRAIN_PER_HOUR;
+                        const totalPreviousDrain = deepDrain + shallowDrain;
+                        
+                        // Niveau d'attention = 100 - fatigue totale
+                        setAttentionLevel(Math.max(0, 100 - totalPreviousDrain - currentSessionDrain));
+                    }, 1000);
+
+                    return () => clearInterval(timer);
+                }
+            }, [isTracking, currentSession, todayDeepWork, todayShallowWork, workType]);
+
+            const calculateTodayTotals = (allSessions) => {
+                const today = new Date().toDateString();
+                const todaySessions = allSessions.filter(s => 
+                    new Date(s.start).toDateString() === today
+                );
+                
+                const deepTotal = todaySessions
+                    .filter(s => s.type === 'deep')
+                    .reduce((sum, s) => sum + s.duration, 0);
+                
+                const shallowTotal = todaySessions
+                    .filter(s => s.type === 'shallow')
+                    .reduce((sum, s) => sum + s.duration, 0);
+                
+                setTodayDeepWork(deepTotal / 3600);
+                setTodayShallowWork(shallowTotal / 3600);
+            };
+
+            const updateDailyStats = (date, deepHours, shallowHours) => {
+                const dateKey = date.toISOString().split('T')[0];
+                const newStats = { ...dailyStats };
+                const totalHours = deepHours + shallowHours;
+
+                if (deepHours >= OPTIMAL_DEEP_MIN && deepHours <= OPTIMAL_DEEP_MAX && totalHours <= TOTAL_OPTIMAL_HOURS) {
+                    newStats[dateKey] = 'optimal';
+                } else if (deepHours > OPTIMAL_DEEP_MAX || totalHours > 9) {
+                    newStats[dateKey] = 'overwork';
+                } else if (totalHours >= 4) {
+                    // ≥ 4h de travail total mais deep work insuffisant → orange
+                    newStats[dateKey] = 'underwork';
+                } else if (totalHours > 0) {
+                    // < 4h de travail total → gris (minimal)
+                    newStats[dateKey] = 'minimal';
+                }
+
+                setDailyStats(newStats);
+            };
+
+            const startTracking = () => {
+                setIsTracking(true);
+                setCurrentSession({ 
+                    start: Date.now(),
+                    type: workType
+                });
+            };
+
+            const stopTracking = () => {
+                if (currentSession) {
+                    // Calculer la durée réelle (temps total - temps de pause)
+                    const totalElapsed = (Date.now() - currentSession.start) / 1000;
+                    const duration = totalElapsed - pausedTime;
+                    
+                    const newSession = {
+                        ...currentSession,
+                        end: Date.now(),
+                        duration: duration,
+                        manual: false
+                    };
+                    
+                    // Mettre la session en attente de validation au lieu de l'enregistrer
+                    setPendingSession(newSession);
+                    setIsTracking(false);
+                    setIsPaused(false);
+                }
+            };
+            
+            const validateSession = () => {
+                if (pendingSession) {
+                    // Ajouter le projectId si un projet est sélectionné
+                    const sessionToAdd = selectedProjectForSession 
+                        ? { ...pendingSession, projectId: selectedProjectForSession }
+                        : pendingSession;
+                    
+                    const updatedSessions = [...sessions, sessionToAdd];
+                    setSessions(updatedSessions);
+                    
+                    const today = new Date();
+                    const todaySessions = updatedSessions.filter(s => 
+                        new Date(s.start).toDateString() === today.toDateString()
+                    );
+                    
+                    const deepTotal = todaySessions
+                        .filter(s => s.type === 'deep')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    const shallowTotal = todaySessions
+                        .filter(s => s.type === 'shallow')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    setTodayDeepWork(deepTotal);
+                    setTodayShallowWork(shallowTotal);
+                    updateDailyStats(today, deepTotal, shallowTotal);
+                    
+                    // Recalculer la fatigue totale de la journée
+                    const totalDrain = (deepTotal * DEEP_WORK_DRAIN_PER_HOUR) + (shallowTotal * SHALLOW_WORK_DRAIN_PER_HOUR);
+                    setAttentionLevel(Math.max(0, 100 - totalDrain));
+                    
+                    // Réinitialiser tous les états
+                    setPendingSession(null);
+                    setSelectedProjectForSession(null);
+                    setPausedTime(0);
+                    setPauseStartTime(null);
+                    setCurrentSession(null);
+                    setCurrentTime(0); // Remettre le timer à zéro
+                    setLastUpdate(Date.now());
+                    setLastSessionEnd(Date.now()); // Marquer la fin de session pour le seuil de récupération
+                }
+            };
+            
+            const cancelSession = () => {
+                // Annuler la session en attente et tout réinitialiser
+                setPendingSession(null);
+                setPausedTime(0);
+                setPauseStartTime(null);
+                setCurrentSession(null);
+                setCurrentTime(0); // Remettre le timer à zéro
+            };
+            
+            const pauseTracking = () => {
+                setIsPaused(true);
+                setPauseStartTime(Date.now());
+            };
+            
+            const resumeTracking = () => {
+                if (pauseStartTime) {
+                    const pauseDuration = (Date.now() - pauseStartTime) / 1000;
+                    setPausedTime(prev => prev + pauseDuration);
+                }
+                setIsPaused(false);
+                setPauseStartTime(null);
+            };
+
+            const addManualSession = () => {
+                const minutes = parseInt(manualMinutes);
+                if (minutes > 0 && minutes <= 600) {
+                    const duration = minutes * 60;
+                    
+                    // Utiliser la date sélectionnée ou aujourd'hui par défaut
+                    let sessionDate;
+                    if (manualDate) {
+                        sessionDate = new Date(manualDate + 'T12:00:00'); // Midi pour éviter les problèmes de timezone
+                    } else {
+                        sessionDate = new Date();
+                    }
+                    
+                    const sessionTime = sessionDate.getTime();
+                    const newSession = {
+                        start: sessionTime - (duration * 1000),
+                        end: sessionTime,
+                        duration: duration,
+                        manual: true,
+                        type: workType,
+                        projectId: selectedProjectForManual || undefined
+                    };
+                    
+                    const updatedSessions = [...sessions, newSession];
+                    setSessions(updatedSessions);
+                    
+                    // Recalculer les stats du jour de la session
+                    const sessionDaySessions = updatedSessions.filter(s => 
+                        new Date(s.start).toDateString() === sessionDate.toDateString()
+                    );
+                    
+                    const dayDeepTotal = sessionDaySessions
+                        .filter(s => s.type === 'deep')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    const dayShallowTotal = sessionDaySessions
+                        .filter(s => s.type === 'shallow')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    updateDailyStats(sessionDate, dayDeepTotal, dayShallowTotal);
+                    
+                    // Si c'est aujourd'hui, mettre à jour les totaux et la jauge
+                    const today = new Date();
+                    if (sessionDate.toDateString() === today.toDateString()) {
+                        setTodayDeepWork(dayDeepTotal);
+                        setTodayShallowWork(dayShallowTotal);
+
+                        const totalDrain = (dayDeepTotal * DEEP_WORK_DRAIN_PER_HOUR) + (dayShallowTotal * SHALLOW_WORK_DRAIN_PER_HOUR);
+                        setAttentionLevel(Math.max(0, 100 - totalDrain));
+
+                        // Mettre à jour lastSessionEnd avec le timestamp de fin de la session manuelle
+                        setLastSessionEnd(newSession.end);
+                    }
+
+                    setManualMinutes('');
+                    setManualDate('');
+                    setSelectedProjectForManual(null);
+                    setShowManualEntry(false);
+                    setLastUpdate(Date.now());
+                }
+            };
+
+            const deleteSession = (index) => {
+                const sessionToDelete = sessions[index];
+                const updatedSessions = sessions.filter((_, i) => i !== index);
+                setSessions(updatedSessions);
+                
+                // Recalculer les totaux du jour de la session supprimée
+                const sessionDate = new Date(sessionToDelete.start);
+                const sessionDateKey = sessionDate.toISOString().split('T')[0];
+                
+                const sameDaySessions = updatedSessions.filter(s => {
+                    const sDate = new Date(s.start);
+                    return sDate.toISOString().split('T')[0] === sessionDateKey;
+                });
+                
+                const dayDeepTotal = sameDaySessions
+                    .filter(s => s.type === 'deep')
+                    .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                
+                const dayShallowTotal = sameDaySessions
+                    .filter(s => s.type === 'shallow')
+                    .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                
+                // Mettre à jour les stats quotidiennes pour la grille
+                const newDailyStats = { ...dailyStats };
+                if (dayDeepTotal === 0 && dayShallowTotal === 0) {
+                    delete newDailyStats[sessionDateKey];
+                } else {
+                    const dayTotalHours = dayDeepTotal + dayShallowTotal;
+                    // Recalculer le statut du jour
+                    if (dayDeepTotal >= OPTIMAL_DEEP_MIN && dayDeepTotal <= OPTIMAL_DEEP_MAX && dayTotalHours <= TOTAL_OPTIMAL_HOURS) {
+                        newDailyStats[sessionDateKey] = 'optimal';
+                    } else if (dayDeepTotal > OPTIMAL_DEEP_MAX || dayTotalHours > TOTAL_OPTIMAL_HOURS) {
+                        newDailyStats[sessionDateKey] = 'overwork';
+                    } else if (dayTotalHours >= 4) {
+                        // ≥ 4h de travail total mais deep work insuffisant → orange
+                        newDailyStats[sessionDateKey] = 'underwork';
+                    } else if (dayTotalHours > 0) {
+                        // < 4h de travail total → gris (minimal)
+                        newDailyStats[sessionDateKey] = 'minimal';
+                    }
+                }
+                setDailyStats(newDailyStats);
+                
+                // Recalculer les totaux d'aujourd'hui si la session supprimée est d'aujourd'hui
+                const today = new Date().toDateString();
+                if (sessionDate.toDateString() === today) {
+                    const todaySessions = updatedSessions.filter(s => 
+                        new Date(s.start).toDateString() === today
+                    );
+                    
+                    const deepTotal = todaySessions
+                        .filter(s => s.type === 'deep')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    const shallowTotal = todaySessions
+                        .filter(s => s.type === 'shallow')
+                        .reduce((sum, s) => sum + s.duration, 0) / 3600;
+                    
+                    setTodayDeepWork(deepTotal);
+                    setTodayShallowWork(shallowTotal);
+                    
+                    // Recalculer la fatigue
+                    const totalDrain = (deepTotal * DEEP_WORK_DRAIN_PER_HOUR) + (shallowTotal * SHALLOW_WORK_DRAIN_PER_HOUR);
+                    setAttentionLevel(Math.max(0, 100 - totalDrain));
+                }
+            };
+
+            const formatTime = (seconds) => {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            const formatDuration = (seconds) => {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                if (hours > 0) {
+                    return `${hours}h ${minutes}m`;
+                }
+                return `${minutes}m`;
+            };
+
+            const formatDateTime = (timestamp) => {
+                const date = new Date(timestamp);
+                return date.toLocaleString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            const getCurrentSessionTime = () => {
+                // Si on a une session en attente de validation, afficher son temps
+                if (pendingSession) {
+                    return pendingSession.duration;
+                }
+                if (!currentSession) return 0;
+                const totalElapsed = (Date.now() - currentSession.start) / 1000;
+                // Si en pause, ajouter le temps de pause en cours
+                const currentPauseTime = isPaused && pauseStartTime ? (Date.now() - pauseStartTime) / 1000 : 0;
+                return totalElapsed - pausedTime - currentPauseTime;
+            };
+
+            const [currentTime, setCurrentTime] = useState(getCurrentSessionTime());
+
+            useEffect(() => {
+                if (isTracking) {
+                    const timer = setInterval(() => {
+                        setCurrentTime(getCurrentSessionTime());
+                    }, 1000);
+                    return () => clearInterval(timer);
+                } else if (pendingSession) {
+                    // Afficher le temps de la session en attente
+                    setCurrentTime(pendingSession.duration);
+                }
+            }, [isTracking, currentSession, isPaused, pausedTime, pauseStartTime, pendingSession]);
+
+            const getAttentionClass = () => {
+                if (attentionLevel > 40) return 'good';
+                return 'warning';
+            };
+
+            const todayTotal = todayDeepWork + todayShallowWork;
+            const remainingDeepWork = Math.max(0, MAX_DEEP_WORK_HOURS - todayDeepWork);
+
+            const clearHistory = () => {
+                if (confirm('Êtes-vous sûr de vouloir effacer tout l\'historique ?')) {
+                    setSessions([]);
+                    setDailyStats({});
+                    setTodayDeepWork(0);
+                    setTodayShallowWork(0);
+                    setAttentionLevel(100);
+                }
+            };
+
+            // ============ FONCTION POUR LE GRAPHIQUE MENSUEL ============
+            const prepareMonthData = (year, month) => {
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const deepWorkData = new Array(daysInMonth).fill(0);
+                const shallowWorkData = new Array(daysInMonth).fill(0);
+
+                sessions.forEach(session => {
+                    const sessionDate = new Date(session.start);
+                    if (sessionDate.getFullYear() === year && sessionDate.getMonth() === month) {
+                        const day = sessionDate.getDate() - 1; // 0-indexed
+                        const hours = session.duration / 3600;
+                        if (session.type === 'deep') {
+                            deepWorkData[day] += hours;
+                        } else {
+                            shallowWorkData[day] += hours;
+                        }
+                    }
+                });
+
+                return {
+                    labels: Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString()),
+                    datasets: [
+                        {
+                            label: 'Deep Work',
+                            data: deepWorkData,
+                            backgroundColor: '#1a4d2e',
+                            borderColor: '#1a4d2e',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Shallow Work',
+                            data: shallowWorkData,
+                            backgroundColor: '#7c3aed',
+                            borderColor: '#7c3aed',
+                            borderWidth: 1
+                        }
+                    ]
+                };
+            };
+
+            // Navigation mois
+            const goToPreviousMonth = () => {
+                if (selectedMonth === 0) {
+                    setSelectedMonth(11);
+                    setSelectedYear(selectedYear - 1);
+                } else {
+                    setSelectedMonth(selectedMonth - 1);
+                }
+            };
+
+            const goToNextMonth = () => {
+                if (selectedMonth === 11) {
+                    setSelectedMonth(0);
+                    setSelectedYear(selectedYear + 1);
+                } else {
+                    setSelectedMonth(selectedMonth + 1);
+                }
+            };
+
+            const getMonthName = (month) => {
+                const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                               'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+                return months[month];
+            };
+
+            // Calculer les moyennes du mois
+            const calculateMonthAverages = (year, month) => {
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                let totalDeep = 0;
+                let totalShallow = 0;
+                let daysWithData = 0;
+
+                sessions.forEach(session => {
+                    const sessionDate = new Date(session.start);
+                    if (sessionDate.getFullYear() === year && sessionDate.getMonth() === month) {
+                        const hours = session.duration / 3600;
+                        if (session.type === 'deep') {
+                            totalDeep += hours;
+                        } else {
+                            totalShallow += hours;
+                        }
+                    }
+                });
+
+                // Compter les jours uniques avec des sessions
+                const daysSet = new Set();
+                sessions.forEach(session => {
+                    const sessionDate = new Date(session.start);
+                    if (sessionDate.getFullYear() === year && sessionDate.getMonth() === month) {
+                        daysSet.add(sessionDate.getDate());
+                    }
+                });
+                daysWithData = daysSet.size || daysInMonth;
+
+                return {
+                    avgDeep: daysWithData > 0 ? totalDeep / daysWithData : 0,
+                    avgShallow: daysWithData > 0 ? totalShallow / daysWithData : 0,
+                    avgTotal: daysWithData > 0 ? (totalDeep + totalShallow) / daysWithData : 0,
+                    totalDeep,
+                    totalShallow,
+                    daysWithData
+                };
+            };
+
+            // ============ FONCTIONS DE GESTION DES PROJETS ============
+            
+            const addProject = () => {
+                if (!newProject.name.trim()) return;
+
+                const project = {
+                    id: Date.now(),
+                    name: newProject.name.trim(),
+                    deadline: newProject.deadline || null,
+                    subtasks: newProject.subtasks.map((name, index) => ({
+                        id: Date.now() + index,
+                        name: name.trim(),
+                        completed: false
+                    })),
+                    completed: false,
+                    completedAt: null,
+                    paused: false,
+                    pausedAt: null,
+                    createdAt: Date.now()
+                };
+                
+                setProjects([...projects, project]);
+                setNewProject({ name: '', deadline: '', subtasks: [] });
+                setShowProjectForm(false);
+            };
+            
+            const addSubtask = () => {
+                if (!newSubtask.trim()) return;
+                setNewProject({
+                    ...newProject,
+                    subtasks: [...newProject.subtasks, newSubtask.trim()]
+                });
+                setNewSubtask('');
+            };
+            
+            const removeSubtask = (index) => {
+                setNewProject({
+                    ...newProject,
+                    subtasks: newProject.subtasks.filter((_, i) => i !== index)
+                });
+            };
+            
+            const toggleSubtask = (projectId, subtaskId) => {
+                setProjects(projects.map(project => {
+                    if (project.id === projectId) {
+                        return {
+                            ...project,
+                            subtasks: project.subtasks.map(subtask => 
+                                subtask.id === subtaskId 
+                                    ? { ...subtask, completed: !subtask.completed }
+                                    : subtask
+                            )
+                        };
+                    }
+                    return project;
+                }));
+            };
+            
+            const completeProject = (projectId) => {
+                setProjects(projects.map(project => 
+                    project.id === projectId 
+                        ? { ...project, completed: true, completedAt: Date.now() }
+                        : project
+                ));
+            };
+            
+            const uncompleteProject = (projectId) => {
+                setProjects(projects.map(project =>
+                    project.id === projectId
+                        ? { ...project, completed: false, completedAt: null }
+                        : project
+                ));
+            };
+
+            const togglePauseProject = (projectId) => {
+                setProjects(projects.map(project =>
+                    project.id === projectId
+                        ? {
+                            ...project,
+                            paused: !project.paused,
+                            pausedAt: !project.paused ? Date.now() : null
+                          }
+                        : project
+                ));
+            };
+
+            const deleteProject = (projectId) => {
+                if (confirm('Supprimer ce projet ?')) {
+                    setProjects(projects.filter(p => p.id !== projectId));
+                }
+            };
+            
+            const getProjectProgress = (project) => {
+                if (project.subtasks.length === 0) return 0;
+                const completed = project.subtasks.filter(st => st.completed).length;
+                return Math.round((completed / project.subtasks.length) * 100);
+            };
+            
+            const getProjectHours = (projectId) => {
+                const projectSessions = sessions.filter(s => s.projectId === projectId);
+                const totalSeconds = projectSessions.reduce((sum, s) => sum + s.duration, 0);
+                const deepSeconds = projectSessions.filter(s => s.type === 'deep').reduce((sum, s) => sum + s.duration, 0);
+                const shallowSeconds = projectSessions.filter(s => s.type === 'shallow').reduce((sum, s) => sum + s.duration, 0);
+                
+                return {
+                    total: (totalSeconds / 3600).toFixed(1),
+                    deep: (deepSeconds / 3600).toFixed(1),
+                    shallow: (shallowSeconds / 3600).toFixed(1)
+                };
+            };
+            
+            const isProjectOverdue = (project) => {
+                if (!project.deadline || project.completed) return false;
+                return new Date(project.deadline) < new Date();
+            };
+
+            const updateProjectDeadline = (projectId, newDeadline) => {
+                setProjects(projects.map(project =>
+                    project.id === projectId
+                        ? { ...project, deadline: newDeadline || null }
+                        : project
+                ));
+                setEditingDeadlineId(null);
+                setTempDeadline('');
+            };
+
+            const startEditingDeadline = (project) => {
+                setEditingDeadlineId(project.id);
+                setTempDeadline(project.deadline || '');
+            };
+
+            const cancelEditingDeadline = () => {
+                setEditingDeadlineId(null);
+                setTempDeadline('');
+            };
+
+            const getActiveProjects = () => {
+                return projects
+                    .filter(p => !p.completed && !p.paused)
+                    .sort((a, b) => {
+                        // Si les deux ont une deadline, trier par date (plus proche en premier)
+                        if (a.deadline && b.deadline) {
+                            return new Date(a.deadline) - new Date(b.deadline);
+                        }
+                        // Si seulement a a une deadline, a vient en premier
+                        if (a.deadline && !b.deadline) {
+                            return -1;
+                        }
+                        // Si seulement b a une deadline, b vient en premier
+                        if (!a.deadline && b.deadline) {
+                            return 1;
+                        }
+                        // Si aucun n'a de deadline, garder l'ordre original
+                        return 0;
+                    });
+            };
+            
+            const getCompletedProjects = () => {
+                const oneYearAgo = Date.now() - (365 * 24 * 60 * 60 * 1000);
+                return projects.filter(p => p.completed && p.completedAt > oneYearAgo)
+                    .sort((a, b) => b.completedAt - a.completedAt);
+            };
+
+            const getPausedProjects = () => {
+                return projects
+                    .filter(p => p.paused && !p.completed)
+                    .sort((a, b) => b.pausedAt - a.pausedAt);
+            };
+
+            // Générer les 365 derniers jours pour la grille
+            const generateCalendarDays = () => {
+                const days = [];
+                const today = new Date();
+                for (let i = 364; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    const dateKey = date.toISOString().split('T')[0];
+                    days.push({
+                        date: dateKey,
+                        status: dailyStats[dateKey] || 'empty'
+                    });
+                }
+                return days;
+            };
+            
+            const groupSessionsByDay = () => {
+                const grouped = {};
+                const sortedSessions = [...sessions].sort((a, b) => b.start - a.start); // Plus récent en premier
+                
+                sortedSessions.forEach((session, originalIndex) => {
+                    const date = new Date(session.start);
+                    const dateKey = date.toLocaleDateString('fr-FR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    
+                    if (!grouped[dateKey]) {
+                        grouped[dateKey] = [];
+                    }
+                    
+                    // Trouver l'index original de la session pour la suppression
+                    const realIndex = sessions.findIndex(s => s.start === session.start && s.duration === session.duration);
+                    grouped[dateKey].push({ ...session, realIndex });
+                });
+                
+                return grouped;
+            };
+
+            // ===== FONCTIONS DE GESTION DES TODOS =====
+            const addTodoTask = () => {
+                if (!todoInput.trim()) return;
+
+                const currentPair = getCurrentPair(twoDayTodos);
+                const updatedPair = {
+                    ...currentPair,
+                    tasks: [...currentPair.tasks, {
+                        id: Date.now(),
+                        text: todoInput.trim(),
+                        done: false,
+                        createdAt: Date.now()
+                    }]
+                };
+
+                setTwoDayTodos(twoDayTodos.map(pair =>
+                    pair.id === currentPair.id ? updatedPair : pair
+                ));
+                setTodoInput('');
+            };
+
+            const toggleTodoTask = (pairId, taskId) => {
+                setTwoDayTodos(twoDayTodos.map(pair => {
+                    if (pair.id === pairId) {
+                        const updatedTasks = pair.tasks.map(task =>
+                            task.id === taskId ? { ...task, done: !task.done } : task
+                        );
+                        return {
+                            ...pair,
+                            tasks: updatedTasks,
+                            completed: updatedTasks.length > 0 && updatedTasks.every(t => t.done)
+                        };
+                    }
+                    return pair;
+                }));
+            };
+
+            const deleteTodoTask = (pairId, taskId) => {
+                setTwoDayTodos(twoDayTodos.map(pair => {
+                    if (pair.id === pairId) {
+                        const updatedTasks = pair.tasks.filter(t => t.id !== taskId);
+                        return {
+                            ...pair,
+                            tasks: updatedTasks,
+                            completed: updatedTasks.length > 0 && updatedTasks.every(t => t.done)
+                        };
+                    }
+                    return pair;
+                }));
+            };
+
+            const moveTodoTaskUp = (pairId, taskId) => {
+                setTwoDayTodos(twoDayTodos.map(pair => {
+                    if (pair.id === pairId) {
+                        const taskIndex = pair.tasks.findIndex(t => t.id === taskId);
+                        if (taskIndex > 0) {
+                            const updatedTasks = [...pair.tasks];
+                            // Échanger avec la tâche précédente
+                            [updatedTasks[taskIndex - 1], updatedTasks[taskIndex]] =
+                            [updatedTasks[taskIndex], updatedTasks[taskIndex - 1]];
+                            return { ...pair, tasks: updatedTasks };
+                        }
+                    }
+                    return pair;
+                }));
+            };
+
+            const moveTodoTaskDown = (pairId, taskId) => {
+                setTwoDayTodos(twoDayTodos.map(pair => {
+                    if (pair.id === pairId) {
+                        const taskIndex = pair.tasks.findIndex(t => t.id === taskId);
+                        if (taskIndex >= 0 && taskIndex < pair.tasks.length - 1) {
+                            const updatedTasks = [...pair.tasks];
+                            // Échanger avec la tâche suivante
+                            [updatedTasks[taskIndex], updatedTasks[taskIndex + 1]] =
+                            [updatedTasks[taskIndex + 1], updatedTasks[taskIndex]];
+                            return { ...pair, tasks: updatedTasks };
+                        }
+                    }
+                    return pair;
+                }));
+            };
+
+            const formatTodoDate = (startDate, endDate) => {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                return `${start.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} - ${end.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}`;
+            };
+
+            // Fonction pour démarrer l'écoute vocale
+            const startListening = async () => {
+                if (!recognition) {
+                    alert("La reconnaissance vocale n'est pas disponible dans votre navigateur.");
+                    return;
+                }
+
+                if (isListening) {
+                    return; // Déjà en écoute
+                }
+
+                try {
+                    // Demander la permission du microphone
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                    setIsListening(true);
+                    recognition.start();
+                } catch (error) {
+                    console.error('Erreur lors du démarrage de la reconnaissance:', error);
+
+                    if (error.name === 'NotAllowedError') {
+                        alert("Permission d'accès au microphone refusée. Veuillez autoriser l'accès au microphone dans les paramètres de votre navigateur.");
+                    } else if (error.name === 'NotFoundError') {
+                        alert("Aucun microphone trouvé. Veuillez connecter un microphone.");
+                    } else {
+                        alert(`Erreur : ${error.message}`);
+                    }
+
+                    setIsListening(false);
+                }
+            };
+
+            // Fonction pour arrêter l'écoute vocale
+            const stopListening = () => {
+                if (recognition && isListening) {
+                    recognition.stop();
+                    setIsListening(false);
+                }
+            };
+
+            // Fonction Text-to-Speech pour faire parler Jarvis
+            const speakText = (text) => {
+                if (!voiceEnabled || !selectedVoice) return;
+
+                // Arrêter toute lecture en cours
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = selectedVoice;
+                utterance.lang = 'fr-FR';
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+
+                window.speechSynthesis.speak(utterance);
+            };
+
+            const askJarvisQuestion = async () => {
+                if (!jarvisChatInput.trim() || jarvisLoading) return;
+
+                setJarvisLoading(true);
+                const question = jarvisChatInput;
+                setJarvisChatInput('');
+
+                // Ajouter la question aux messages
+                const userMessage = { role: 'user', content: question };
+                setJarvisChatMessages(prev => [...prev, userMessage]);
+
+                // Préparer le contexte
+                const context = {
+                    todayDeepWork,
+                    todayShallowWork,
+                    attentionLevel,
+                    totalSessions: sessions.length,
+                    recentInsights: jarvisInsights
+                };
+
+                // Appeler l'API Jarvis
+                const response = await JarvisOnlineAPI.askJarvis(question, context, jarvisApiKey);
+
+                if (response.error) {
+                    const errorMessage = { role: 'assistant', content: `Erreur : ${response.error}` };
+                    setJarvisChatMessages(prev => [...prev, errorMessage]);
+                    speakText(`Erreur : ${response.error}`);
+                } else {
+                    const assistantMessage = { role: 'assistant', content: response.message };
+                    setJarvisChatMessages(prev => [...prev, assistantMessage]);
+
+                    // Faire parler Jarvis
+                    speakText(response.message);
+
+                    // Mettre à jour le quota
+                    setJarvisQuota(prev => ({
+                        used: prev.used + 1,
+                        limit: prev.limit,
+                        cost: prev.cost + response.cost
+                    }));
+                }
+
+                setJarvisLoading(false);
+            };
+
+            // Auto-envoyer la question après reconnaissance vocale
+            useEffect(() => {
+                if (voiceInputReceived && jarvisChatInput.trim() && !jarvisLoading) {
+                    setVoiceInputReceived(false); // Réinitialiser le flag
+                    askJarvisQuestion();
+                }
+            }, [voiceInputReceived, jarvisChatInput]);
+
+            return (
+                <div className="container">
+                    <button 
+                        className="dark-mode-toggle"
+                        onClick={() => setDarkMode(!darkMode)}
+                        title={darkMode ? "Mode clair" : "Mode sombre"}
+                    >
+                        {darkMode ? '☀️' : '🌙'}
+                    </button>
+                    
+                    <div className="header">
+                        <h1 className="title">Attention Tracker</h1>
+                        <p className="subtitle">Deep Work & Shallow Work — Basé sur les recherches scientifiques</p>
+                    </div>
+
+                    {/* JARVIS AI ANALYTICS CARD - TEMPORAIREMENT MASQUÉ */}
+                    {false && <div className="jarvis-card">
+                        <div className="jarvis-header">
+                            <div className="jarvis-title">
+                                <span>🤖</span>
+                                <span>Jarvis Analytics</span>
+                            </div>
+                            <div className="mode-toggle">
+                                <button
+                                    className={jarvisMode === 'offline' ? 'active' : ''}
+                                    onClick={() => setJarvisMode('offline')}
+                                >
+                                    Offline
+                                </button>
+                                <button
+                                    className={jarvisMode === 'online' ? 'active' : ''}
+                                    onClick={() => setJarvisMode('online')}
+                                >
+                                    Online
+                                </button>
+                            </div>
+                        </div>
+
+                        {jarvisMode === 'offline' && (
+                            <div className="insights-grid">
+                                {jarvisInsights.map((insight, i) => (
+                                    <div key={i} className={`insight-item ${insight.type}`}>
+                                        <div className="insight-icon">{insight.icon}</div>
+                                        <div className="insight-text">{insight.message}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {jarvisMode === 'online' && (
+                            <div>
+                                {!jarvisApiKey ? (
+                                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                                        <p style={{ marginBottom: '16px', color: 'rgba(255,255,255,0.9)' }}>
+                                            Configure ton API key Anthropic pour activer Jarvis Online
+                                        </p>
+                                        <input
+                                            type="password"
+                                            placeholder="sk-ant-..."
+                                            className="input"
+                                            style={{ maxWidth: '400px', marginBottom: '12px', margin: '0 auto', display: 'block' }}
+                                            onChange={(e) => setJarvisApiKey(e.target.value)}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {/* Indicateur API Key configurée */}
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            marginBottom: '16px',
+                                            padding: '10px',
+                                            background: 'rgba(74, 222, 128, 0.1)',
+                                            borderRadius: '6px'
+                                        }}>
+                                            <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)' }}>
+                                                ✅ API key configurée
+                                            </span>
+                                            <button
+                                                className="jarvis-button"
+                                                onClick={() => {
+                                                    if (confirm('Veux-tu vraiment supprimer la clé API ?')) {
+                                                        setJarvisApiKey(null);
+                                                        setJarvisChatMessages([]);
+                                                    }
+                                                }}
+                                                style={{ fontSize: '12px', padding: '6px 12px' }}
+                                            >
+                                                Changer la clé
+                                            </button>
+                                        </div>
+
+                                        {jarvisChatMessages.length > 0 && (
+                                            <div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                                    <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+                                                        Historique ({jarvisChatMessages.length} messages)
+                                                    </span>
+                                                    <button
+                                                        className="jarvis-button"
+                                                        onClick={() => setJarvisChatMessages([])}
+                                                        style={{ fontSize: '12px', padding: '4px 10px' }}
+                                                    >
+                                                        🗑️ Effacer
+                                                    </button>
+                                                </div>
+                                                <div style={{ marginBottom: '16px', maxHeight: '200px', overflowY: 'auto' }}>
+                                                    {jarvisChatMessages.slice(-6).map((msg, i) => (
+                                                        <div key={i} style={{
+                                                            marginBottom: '12px',
+                                                            padding: '10px',
+                                                            background: msg.role === 'user' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)',
+                                                            borderRadius: '6px'
+                                                        }}>
+                                                            <strong>{msg.role === 'user' ? 'Toi:' : 'Jarvis:'}</strong> {msg.content}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <p style={{ fontSize: '14px', marginBottom: '12px', color: 'rgba(255,255,255,0.9)' }}>
+                                                Pose une question à Jarvis sur ta productivité :
+                                            </p>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Ex: Pourquoi je suis moins productif cette semaine ?"
+                                                    className="input"
+                                                    value={jarvisChatInput}
+                                                    onChange={(e) => setJarvisChatInput(e.target.value)}
+                                                    onKeyPress={(e) => {
+                                                        if (e.key === 'Enter' && jarvisChatInput.trim()) {
+                                                            askJarvisQuestion();
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        flex: 1,
+                                                        background: 'rgba(255,255,255,0.15)',
+                                                        border: '1px solid rgba(255,255,255,0.2)',
+                                                        color: '#fafaf8'
+                                                    }}
+                                                />
+                                                <button
+                                                    className="jarvis-button"
+                                                    onClick={askJarvisQuestion}
+                                                    disabled={jarvisLoading}
+                                                >
+                                                    {jarvisLoading ? '...' : 'Envoyer'}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Voice Controls */}
+                                        <div className="voice-controls">
+                                            <button
+                                                className={`mic-button ${isListening ? 'listening' : ''}`}
+                                                onClick={isListening ? stopListening : startListening}
+                                                title={isListening ? "Arrêter l'écoute" : "Parler à Jarvis"}
+                                            >
+                                                {isListening ? '⏸️' : '🎤'}
+                                            </button>
+
+                                            {isListening && (
+                                                <div className="listening-indicator">
+                                                    <div className="wave">
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                        <span></span>
+                                                    </div>
+                                                    J'écoute...
+                                                </div>
+                                            )}
+
+                                            {!isListening && (
+                                                <>
+                                                    <label className="voice-toggle">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={voiceEnabled}
+                                                            onChange={(e) => setVoiceEnabled(e.target.checked)}
+                                                        />
+                                                        <span>🔊 Réponse vocale</span>
+                                                    </label>
+
+                                                    {availableVoices.length > 0 && (
+                                                        <select
+                                                            className="voice-select"
+                                                            value={selectedVoice?.name || ''}
+                                                            onChange={(e) => {
+                                                                const voice = availableVoices.find(v => v.name === e.target.value);
+                                                                setSelectedVoice(voice);
+                                                            }}
+                                                        >
+                                                            {availableVoices.map((voice, i) => (
+                                                                <option key={i} value={voice.name}>
+                                                                    {voice.name} ({voice.lang})
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <div className="quota-display">
+                                            💳 Quota: {jarvisQuota.used}/{jarvisQuota.limit} requêtes | Coût total: ${jarvisQuota.cost.toFixed(4)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>}
+
+                    <div className="card">
+                        <div className="section-label">Capacité cognitive</div>
+                        <div className="metric-row">
+                            <span style={{ fontSize: '15px', color: '#737373', fontWeight: 400 }}>Niveau actuel</span>
+                            <span className="metric-value">
+                                {Math.round(attentionLevel)}
+                            </span>
+                        </div>
+                        <div className="gauge-container">
+                            <div 
+                                className={`gauge-fill ${getAttentionClass()}`}
+                                style={{ width: `${attentionLevel}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* ========== GRAPHIQUE MENSUEL ========== */}
+                    <div className="card">
+                        <div className="section-header" style={{ marginBottom: '20px' }}>
+                            <div className="section-label">Suivi mensuel — {getMonthName(selectedMonth)} {selectedYear}</div>
+                            <div className="chart-nav">
+                                <button
+                                    onClick={goToPreviousMonth}
+                                    className="button"
+                                    style={{
+                                        padding: '8px 16px',
+                                        fontSize: '14px',
+                                        minWidth: 'auto'
+                                    }}
+                                >
+                                    ← Mois précédent
+                                </button>
+                                <button
+                                    onClick={goToNextMonth}
+                                    className="button"
+                                    style={{
+                                        padding: '8px 16px',
+                                        fontSize: '14px',
+                                        minWidth: 'auto'
+                                    }}
+                                >
+                                    Mois suivant →
+                                </button>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '20px', alignItems: 'stretch' }}>
+                            {/* Graphique */}
+                            <div className="chart-container" style={{
+                                position: 'relative',
+                                height: '300px',
+                                flex: '1',
+                                minWidth: 0
+                            }}>
+                                <canvas ref={chartRef}></canvas>
+                            </div>
+
+                            {/* Statistiques mensuelles */}
+                            <div style={{
+                                width: '240px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '12px',
+                                padding: '16px',
+                                background: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                                borderRadius: '8px',
+                                border: darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)'
+                            }}>
+                                {(() => {
+                                    const monthStats = calculateMonthAverages(selectedYear, selectedMonth);
+                                    return (
+                                        <>
+                                            <div style={{ marginBottom: '8px' }}>
+                                                <div style={{
+                                                    fontSize: '13px',
+                                                    fontWeight: 500,
+                                                    color: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+                                                    marginBottom: '12px'
+                                                }}>
+                                                    Moyennes journalières
+                                                </div>
+                                            </div>
+
+                                            {/* Moyenne totale */}
+                                            <div style={{
+                                                padding: '12px',
+                                                background: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                                                borderRadius: '6px'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '11px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                                                    marginBottom: '4px',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px'
+                                                }}>
+                                                    Total
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '28px',
+                                                    fontWeight: 600,
+                                                    color: darkMode ? '#fafaf8' : '#0a0a0a'
+                                                }}>
+                                                    {monthStats.avgTotal.toFixed(1)}h
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '11px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                                                    marginTop: '4px'
+                                                }}>
+                                                    par jour
+                                                </div>
+                                            </div>
+
+                                            {/* Deep Work */}
+                                            <div style={{
+                                                padding: '10px',
+                                                background: 'rgba(26, 77, 46, 0.1)',
+                                                borderRadius: '6px',
+                                                borderLeft: '3px solid #1a4d2e'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '11px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                                                    marginBottom: '4px',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px'
+                                                }}>
+                                                    Deep Work
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '22px',
+                                                    fontWeight: 600,
+                                                    color: '#1a4d2e'
+                                                }}>
+                                                    {monthStats.avgDeep.toFixed(1)}h
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '10px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                                                    marginTop: '2px'
+                                                }}>
+                                                    {monthStats.totalDeep.toFixed(1)}h total
+                                                </div>
+                                            </div>
+
+                                            {/* Shallow Work */}
+                                            <div style={{
+                                                padding: '10px',
+                                                background: 'rgba(124, 58, 237, 0.1)',
+                                                borderRadius: '6px',
+                                                borderLeft: '3px solid #7c3aed'
+                                            }}>
+                                                <div style={{
+                                                    fontSize: '11px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                                                    marginBottom: '4px',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px'
+                                                }}>
+                                                    Shallow Work
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '22px',
+                                                    fontWeight: 600,
+                                                    color: '#7c3aed'
+                                                }}>
+                                                    {monthStats.avgShallow.toFixed(1)}h
+                                                </div>
+                                                <div style={{
+                                                    fontSize: '10px',
+                                                    color: darkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                                                    marginTop: '2px'
+                                                }}>
+                                                    {monthStats.totalShallow.toFixed(1)}h total
+                                                </div>
+                                            </div>
+
+                                            {/* Jours actifs */}
+                                            <div style={{
+                                                fontSize: '11px',
+                                                color: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
+                                                textAlign: 'center',
+                                                marginTop: '4px',
+                                                paddingTop: '8px',
+                                                borderTop: darkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)'
+                                            }}>
+                                                {monthStats.daysWithData} jour{monthStats.daysWithData > 1 ? 's' : ''} avec sessions
+                                            </div>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <div className="section-label">Suivi annuel — 365 derniers jours</div>
+                        <div className="calendar-grid">
+                            {generateCalendarDays().map((day, index) => (
+                                <div 
+                                    key={index}
+                                    className={`calendar-day ${day.status}`}
+                                    title={day.date}
+                                />
+                            ))}
+                        </div>
+                        <div className="calendar-legend">
+                            <div className="legend-item">
+                                <div className="legend-box optimal"></div>
+                                <span>Optimal (3-4h deep)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-box underwork"></div>
+                                <span>Bon volume (≥4h total)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-box minimal"></div>
+                                <span>Insuffisant (&lt;4h)</span>
+                            </div>
+                            <div className="legend-item">
+                                <div className="legend-box overwork"></div>
+                                <span>Surmenage</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ========== TO-DO PAR PAIRES DE 2 JOURS ========== */}
+                    <div className="card">
+                        <div className="section-header">
+                            <div className="section-label">To-Do par Paires (2 jours)</div>
+                            {twoDayTodos.filter(p => p.archived).length > 0 && (
+                                <button
+                                    onClick={() => setShowArchivedTodos(!showArchivedTodos)}
+                                    className="button-text"
+                                >
+                                    {showArchivedTodos ? 'Masquer' : 'Voir'} archivées ({twoDayTodos.filter(p => p.archived).length})
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Paire actuelle */}
+                        {(() => {
+                            const currentPair = getCurrentPair(twoDayTodos);
+                            if (!currentPair) return null;
+
+                            return (
+                                <div className={`todo-pair ${currentPair.completed ? '' : 'current'}`}>
+                                    <div className="todo-pair-header">
+                                        <div className="todo-date">
+                                            📅 {formatTodoDate(currentPair.startDate, currentPair.endDate)}
+                                        </div>
+                                        {currentPair.completed && (
+                                            <span className="todo-badge">✓ Complété</span>
+                                        )}
+                                    </div>
+
+                                    {currentPair.tasks.length === 0 ? (
+                                        <div className="empty-state" style={{ padding: '20px 0' }}>
+                                            Aucune tâche pour cette paire
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            {currentPair.tasks.map((task, index) => (
+                                                <div key={task.id} className={`todo-task ${task.done ? 'completed' : ''}`}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={task.done}
+                                                        onChange={() => toggleTodoTask(currentPair.id, task.id)}
+                                                    />
+                                                    <span>{task.text}</span>
+                                                    <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
+                                                        <button
+                                                            className="delete-task"
+                                                            onClick={() => moveTodoTaskUp(currentPair.id, task.id)}
+                                                            title="Déplacer vers le haut"
+                                                            disabled={index === 0}
+                                                            style={{
+                                                                opacity: index === 0 ? 0.3 : 1,
+                                                                cursor: index === 0 ? 'not-allowed' : 'pointer',
+                                                                fontSize: '14px'
+                                                            }}
+                                                        >
+                                                            ↑
+                                                        </button>
+                                                        <button
+                                                            className="delete-task"
+                                                            onClick={() => moveTodoTaskDown(currentPair.id, task.id)}
+                                                            title="Déplacer vers le bas"
+                                                            disabled={index === currentPair.tasks.length - 1}
+                                                            style={{
+                                                                opacity: index === currentPair.tasks.length - 1 ? 0.3 : 1,
+                                                                cursor: index === currentPair.tasks.length - 1 ? 'not-allowed' : 'pointer',
+                                                                fontSize: '14px'
+                                                            }}
+                                                        >
+                                                            ↓
+                                                        </button>
+                                                        <button
+                                                            className="delete-task"
+                                                            onClick={() => deleteTodoTask(currentPair.id, task.id)}
+                                                            title="Supprimer"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="todo-input-group">
+                                        <input
+                                            type="text"
+                                            className="input"
+                                            placeholder="Nouvelle tâche..."
+                                            value={todoInput}
+                                            onChange={(e) => setTodoInput(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && addTodoTask()}
+                                        />
+                                        <button onClick={addTodoTask} className="button button-primary">
+                                            Ajouter
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {/* Paires archivées */}
+                        {showArchivedTodos && (
+                            <div style={{ marginTop: '20px' }}>
+                                <div className="section-label">Paires archivées</div>
+                                {twoDayTodos
+                                    .filter(pair => pair.archived)
+                                    .sort((a, b) => new Date(b.endDate) - new Date(a.endDate))
+                                    .slice(0, 5)
+                                    .map(pair => (
+                                        <div key={pair.id} className="todo-pair" style={{ opacity: 0.6 }}>
+                                            <div className="todo-pair-header">
+                                                <div className="todo-date">
+                                                    {formatTodoDate(pair.startDate, pair.endDate)}
+                                                </div>
+                                                {pair.completed && (
+                                                    <span className="todo-badge">✓ Complété</span>
+                                                )}
+                                            </div>
+                                            {pair.tasks.length > 0 && (
+                                                <div style={{ fontSize: '13px', color: '#737373' }}>
+                                                    {pair.tasks.filter(t => t.done).length}/{pair.tasks.length} tâches complétées
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card">
+                        <div className="section-label">Type de session</div>
+                        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                            <button
+                                onClick={() => setWorkType('deep')}
+                                disabled={isTracking}
+                                className={`button ${workType === 'deep' ? 'active' : ''}`}
+                                style={{
+                                    flex: 1,
+                                    opacity: isTracking ? 0.5 : 1,
+                                    cursor: isTracking ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                Deep Work
+                            </button>
+                            <button
+                                onClick={() => setWorkType('shallow')}
+                                disabled={isTracking}
+                                className={`button ${workType === 'shallow' ? 'active' : ''}`}
+                                style={{
+                                    flex: 1,
+                                    opacity: isTracking ? 0.5 : 1,
+                                    cursor: isTracking ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                Shallow Work
+                            </button>
+                        </div>
+                        <div className="info-box">
+                            {workType === 'deep' ? (
+                                <>
+                                    <strong>Deep Work :</strong> Travail cognitif intense nécessitant une concentration maximale. 
+                                    Limite recommandée : 3-4h par jour.
+                                </>
+                            ) : (
+                                <>
+                                    <strong>Shallow Work :</strong> Tâches administratives, emails, réunions ne nécessitant pas 
+                                    une concentration profonde. Maximum 4h par jour.
+                                </>
+                            )}
+                        </div>
+                        <div className="timer">
+                            <div className="timer-display" style={{ opacity: isPaused ? 0.5 : 1 }}>
+                                {formatTime(currentTime)}
+                                {isPaused && <div style={{ fontSize: '16px', marginTop: '8px', color: '#737373' }}>EN PAUSE</div>}
+                            </div>
+                            <div className="button-group">
+                                {pendingSession ? (
+                                    // Session en attente de validation
+                                    <>
+                                        <div style={{ width: '100%', marginBottom: '12px' }}>
+                                            <select 
+                                                value={selectedProjectForSession || ''}
+                                                onChange={(e) => setSelectedProjectForSession(e.target.value ? parseInt(e.target.value) : null)}
+                                                className="project-select"
+                                                style={{ width: '100%' }}
+                                            >
+                                                <option value="">Aucun projet</option>
+                                                {getActiveProjects().map(project => (
+                                                    <option key={project.id} value={project.id}>
+                                                        {project.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button onClick={validateSession} className="button button-primary">
+                                            Valider
+                                        </button>
+                                        <button onClick={cancelSession} className="button button-secondary">
+                                            Annuler
+                                        </button>
+                                    </>
+                                ) : isTracking ? (
+                                    // Timer en cours
+                                    <>
+                                        {isPaused ? (
+                                            <button onClick={resumeTracking} className="button button-primary">
+                                                Reprendre
+                                            </button>
+                                        ) : (
+                                            <button onClick={pauseTracking} className="button button-secondary">
+                                                Pause
+                                            </button>
+                                        )}
+                                        <button onClick={stopTracking} className="button button-primary">
+                                            Arrêter
+                                        </button>
+                                    </>
+                                ) : (
+                                    // Pas de timer actif
+                                    <>
+                                        <button 
+                                            onClick={startTracking} 
+                                            className="button button-primary"
+                                            disabled={remainingDeepWork <= 0 && workType === 'deep'}
+                                        >
+                                            Démarrer
+                                        </button>
+                                        <button onClick={() => setShowManualEntry(!showManualEntry)} className="button button-secondary">
+                                            Ajouter
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {showManualEntry && (
+                            <div className="manual-entry">
+                                <div className="section-label">Ajouter une session</div>
+                                <div className="input-group" style={{ marginBottom: '12px' }}>
+                                    <input
+                                        type="date"
+                                        value={manualDate}
+                                        onChange={(e) => setManualDate(e.target.value)}
+                                        className="input"
+                                        max={new Date().toISOString().split('T')[0]}
+                                        style={{ flex: '0 0 auto', minWidth: '160px' }}
+                                    />
+                                    <input
+                                        type="number"
+                                        value={manualMinutes}
+                                        onChange={(e) => setManualMinutes(e.target.value)}
+                                        placeholder="Minutes"
+                                        className="input"
+                                        min="1"
+                                        max="600"
+                                        style={{ flex: 1 }}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <select 
+                                        value={selectedProjectForManual || ''}
+                                        onChange={(e) => setSelectedProjectForManual(e.target.value ? parseInt(e.target.value) : null)}
+                                        className="project-select"
+                                        style={{ flex: 1 }}
+                                    >
+                                        <option value="">Aucun projet</option>
+                                        {getActiveProjects().map(project => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button onClick={addManualSession} className="button button-primary">
+                                        Valider
+                                    </button>
+                                </div>
+                                <div className="input-hint">
+                                    Sélectionnez une date (optionnel), entrez les minutes travaillées (max 600) et choisissez un projet (optionnel)
+                                </div>
+                            </div>
+                        )}
+
+                        {attentionLevel < 40 && (
+                            <div className="alert">
+                                <div className="alert-title">Attention faible — Pause recommandée</div>
+                                <div className="alert-content">
+                                    <p>Votre cerveau nécessite une récupération significative pour maintenir une productivité optimale.</p>
+                                    <ul className="alert-list">
+                                        <li>Pause de 10-15 minutes minimum</li>
+                                        <li>Privilégiez le contact avec la nature</li>
+                                        <li>Évitez les écrans durant la pause</li>
+                                        <li>Une sieste courte (15-20 min) restaure environ 25% de capacité</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        {attentionLevel >= 40 && attentionLevel < 70 && todayTotal > 2 && (
+                            <div className="alert">
+                                <div className="alert-title">Micro-pause suggérée</div>
+                                <div className="alert-content">
+                                    Des pauses de 5-10 minutes toutes les 90 minutes améliorent significativement 
+                                    votre performance cognitive et votre bien-être général.
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ========== SECTION PROJETS ========== */}
+                    <div className="card">
+                        <div className="section-header">
+                            <div className="section-label">Projets</div>
+                            <button onClick={() => setShowProjectForm(!showProjectForm)} className="button button-secondary">
+                                {showProjectForm ? 'Annuler' : '+ Nouveau'}
+                            </button>
+                        </div>
+
+                        {showProjectForm && (
+                            <div className="manual-entry" style={{ marginBottom: '20px' }}>
+                                <div className="input-group" style={{ marginBottom: '12px' }}>
+                                    <input
+                                        type="text"
+                                        value={newProject.name}
+                                        onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                                        placeholder="Nom du projet"
+                                        className="input"
+                                        style={{ flex: 1 }}
+                                    />
+                                    <input
+                                        type="date"
+                                        value={newProject.deadline}
+                                        onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
+                                        className="input"
+                                        style={{ flex: '0 0 auto', minWidth: '160px' }}
+                                    />
+                                </div>
+                                
+                                <div className="input-group" style={{ marginBottom: '12px' }}>
+                                    <input
+                                        type="text"
+                                        value={newSubtask}
+                                        onChange={(e) => setNewSubtask(e.target.value)}
+                                        placeholder="Ajouter une sous-tâche"
+                                        className="input"
+                                        style={{ flex: 1 }}
+                                        onKeyPress={(e) => e.key === 'Enter' && addSubtask()}
+                                    />
+                                    <button onClick={addSubtask} className="button button-secondary">
+                                        + Ajouter
+                                    </button>
+                                </div>
+                                
+                                {newProject.subtasks.length > 0 && (
+                                    <div style={{ marginBottom: '12px' }}>
+                                        {newProject.subtasks.map((subtask, index) => (
+                                            <div key={index} style={{ 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                gap: '8px', 
+                                                padding: '6px 0',
+                                                fontSize: '14px'
+                                            }}>
+                                                <span style={{ flex: 1 }}>• {subtask}</span>
+                                                <button 
+                                                    onClick={() => removeSubtask(index)}
+                                                    className="button-text"
+                                                    style={{ fontSize: '12px', color: '#7f1d1d' }}
+                                                >
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                <button onClick={addProject} className="button button-primary" style={{ width: '100%' }}>
+                                    Créer le projet
+                                </button>
+                            </div>
+                        )}
+                        
+                        {/* Projets actifs */}
+                        {getActiveProjects().length === 0 && !showProjectForm ? (
+                            <div className="empty-state">Aucun projet en cours</div>
+                        ) : (
+                            <div>
+                                {getActiveProjects().map(project => {
+                                    const progress = getProjectProgress(project);
+                                    const hours = getProjectHours(project.id);
+                                    const overdue = isProjectOverdue(project);
+                                    
+                                    return (
+                                        <div key={project.id} style={{ 
+                                            marginBottom: '16px', 
+                                            padding: '16px', 
+                                            background: darkMode ? '#1a1a1a' : '#ffffff',
+                                            border: '1px solid',
+                                            borderColor: overdue ? '#7f1d1d' : (darkMode ? '#2a2a2a' : '#e8e8e6'),
+                                            borderRadius: '8px'
+                                        }}>
+                                            <div style={{ 
+                                                display: 'flex', 
+                                                justifyContent: 'space-between', 
+                                                alignItems: 'flex-start',
+                                                marginBottom: '12px'
+                                            }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <h3 style={{ 
+                                                        margin: '0 0 6px 0', 
+                                                        fontSize: '18px',
+                                                        fontWeight: '600',
+                                                        letterSpacing: '-0.01em',
+                                                        color: overdue ? '#7f1d1d' : (darkMode ? '#fafaf8' : '#0a0a0a')
+                                                    }}>
+                                                        {project.name}
+                                                        {overdue && <span style={{ marginLeft: '8px', fontSize: '16px' }}>⚠️</span>}
+                                                    </h3>
+                                                    {editingDeadlineId === project.id ? (
+                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                                            <input
+                                                                type="date"
+                                                                value={tempDeadline}
+                                                                onChange={(e) => setTempDeadline(e.target.value)}
+                                                                className="input"
+                                                                style={{
+                                                                    flex: 1,
+                                                                    fontSize: '13px',
+                                                                    padding: '4px 8px'
+                                                                }}
+                                                            />
+                                                            <button
+                                                                onClick={() => updateProjectDeadline(project.id, tempDeadline)}
+                                                                className="button button-primary"
+                                                                style={{ padding: '4px 12px', fontSize: '12px' }}
+                                                            >
+                                                                ✓
+                                                            </button>
+                                                            <button
+                                                                onClick={cancelEditingDeadline}
+                                                                className="button"
+                                                                style={{ padding: '4px 12px', fontSize: '12px' }}
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            onClick={() => startEditingDeadline(project)}
+                                                            style={{
+                                                                fontSize: '13px',
+                                                                color: overdue ? '#7f1d1d' : '#737373',
+                                                                marginBottom: '4px',
+                                                                cursor: 'pointer',
+                                                                display: 'inline-block',
+                                                                padding: '2px 4px',
+                                                                borderRadius: '4px',
+                                                                transition: 'background 0.2s'
+                                                            }}
+                                                            onMouseEnter={(e) => e.target.style.background = darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
+                                                            onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                                                            title="Cliquer pour modifier"
+                                                        >
+                                                            📅 {project.deadline ? new Date(project.deadline).toLocaleDateString('fr-FR') : 'Pas de deadline'}
+                                                            {overdue && ' (en retard)'}
+                                                        </div>
+                                                    )}
+                                                    {project.subtasks.length > 0 && (
+                                                        <div style={{ 
+                                                            fontSize: '14px',
+                                                            fontWeight: '600',
+                                                            color: darkMode ? '#fafaf8' : '#0a0a0a'
+                                                        }}>
+                                                            {progress}% complété
+                                                        </div>
+                                                    )}
+                                                    <div style={{ marginTop: '8px' }}>
+                                                        {parseFloat(hours.total) > 0 ? (
+                                                            <>
+                                                                <div style={{ fontSize: '15px', fontWeight: '600', color: darkMode ? '#fafaf8' : '#0a0a0a', marginBottom: '2px' }}>
+                                                                    ⏱️ {hours.total}h
+                                                                </div>
+                                                                <div style={{ fontSize: '12px', color: '#737373' }}>
+                                                                    {hours.deep}h de deep work • {hours.shallow}h de shallow work
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <div style={{ fontSize: '13px', color: '#737373' }}>
+                                                                ⏱️ 0h passée sur ce projet
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button
+                                                        onClick={() => togglePauseProject(project.id)}
+                                                        className="button-text"
+                                                        style={{ fontSize: '12px', color: '#d97706' }}
+                                                        title="Mettre en pause le projet"
+                                                    >
+                                                        ⏸ Pause
+                                                    </button>
+                                                    <button
+                                                        onClick={() => completeProject(project.id)}
+                                                        className="button-text"
+                                                        style={{ fontSize: '12px', color: '#1a4d2e' }}
+                                                    >
+                                                        ✓ Terminer
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteProject(project.id)}
+                                                        className="button-text"
+                                                        style={{ fontSize: '12px', color: '#7f1d1d' }}
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Sous-tâches */}
+                                            {project.subtasks.length > 0 && (
+                                                <div>
+                                                    {/* Ligne de séparation */}
+                                                    <div style={{
+                                                        width: '60%',
+                                                        height: '1px',
+                                                        background: darkMode ? '#2a2a2a' : '#e8e8e6',
+                                                        margin: '16px 0 12px 0'
+                                                    }}></div>
+                                                    
+                                                    {project.subtasks.map(subtask => (
+                                                        <div key={subtask.id} style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '8px',
+                                                            padding: '8px 0',
+                                                            fontSize: '14px'
+                                                        }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={subtask.completed}
+                                                                onChange={() => toggleSubtask(project.id, subtask.id)}
+                                                                style={{ cursor: 'pointer' }}
+                                                            />
+                                                            <span style={{
+                                                                textDecoration: subtask.completed ? 'line-through' : 'none',
+                                                                color: subtask.completed ? '#737373' : (darkMode ? '#fafaf8' : '#0a0a0a')
+                                                            }}>
+                                                                {subtask.name}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Projets en pause */}
+                        {getPausedProjects().length > 0 && (
+                            <div style={{ marginTop: '24px' }}>
+                                <button
+                                    onClick={() => setShowPausedProjects(!showPausedProjects)}
+                                    className="button-text"
+                                    style={{ width: '100%', textAlign: 'left', padding: '12px 0' }}
+                                >
+                                    {showPausedProjects ? '▼' : '▶'} Projets en pause ({getPausedProjects().length})
+                                </button>
+
+                                {showPausedProjects && (
+                                    <div>
+                                        {getPausedProjects().map(project => {
+                                            const progress = getProjectProgress(project);
+                                            const hours = getProjectHours(project.id);
+                                            const overdue = isProjectOverdue(project);
+
+                                            return (
+                                                <div key={project.id} style={{
+                                                    marginBottom: '12px',
+                                                    padding: '12px',
+                                                    background: darkMode ? '#1a1a1a' : '#f5f5f3',
+                                                    border: '1px solid',
+                                                    borderColor: darkMode ? '#2a2a2a' : '#e8e8e6',
+                                                    borderRadius: '8px',
+                                                    opacity: 0.7
+                                                }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <div>
+                                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                ⏸ {project.name}
+                                                            </h4>
+                                                            <div style={{ fontSize: '12px', color: '#737373' }}>
+                                                                En pause depuis le {new Date(project.pausedAt).toLocaleDateString('fr-FR')}
+                                                            </div>
+                                                            {project.deadline && (
+                                                                <div style={{
+                                                                    fontSize: '12px',
+                                                                    color: overdue ? '#7f1d1d' : '#737373',
+                                                                    marginTop: '2px'
+                                                                }}>
+                                                                    📅 {new Date(project.deadline).toLocaleDateString('fr-FR')}
+                                                                    {overdue && ' (en retard)'}
+                                                                </div>
+                                                            )}
+                                                            <div style={{ marginTop: '4px' }}>
+                                                                {parseFloat(hours.total) > 0 ? (
+                                                                    <>
+                                                                        <div style={{ fontSize: '13px', fontWeight: '600', color: darkMode ? '#d4d4d2' : '#525252', marginBottom: '2px' }}>
+                                                                            ⏱️ {hours.total}h
+                                                                        </div>
+                                                                        <div style={{ fontSize: '11px', color: '#737373' }}>
+                                                                            {hours.deep}h de deep work • {hours.shallow}h de shallow work
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <div style={{ fontSize: '12px', color: '#737373' }}>
+                                                                        ⏱️ 0h passée sur ce projet
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button
+                                                                onClick={() => togglePauseProject(project.id)}
+                                                                className="button-text"
+                                                                style={{ fontSize: '12px', color: '#1a4d2e' }}
+                                                                title="Reprendre le projet"
+                                                            >
+                                                                ▶ Reprendre
+                                                            </button>
+                                                            <button
+                                                                onClick={() => deleteProject(project.id)}
+                                                                className="button-text"
+                                                                style={{ fontSize: '12px', color: '#7f1d1d' }}
+                                                            >
+                                                                Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Projets terminés */}
+                        {getCompletedProjects().length > 0 && (
+                            <div style={{ marginTop: '24px' }}>
+                                <button 
+                                    onClick={() => setShowCompletedProjects(!showCompletedProjects)}
+                                    className="button-text"
+                                    style={{ width: '100%', textAlign: 'left', padding: '12px 0' }}
+                                >
+                                    {showCompletedProjects ? '▼' : '▶'} Projets terminés ({getCompletedProjects().length})
+                                </button>
+                                
+                                {showCompletedProjects && (
+                                    <div>
+                                        {getCompletedProjects().map(project => {
+                                            const hours = getProjectHours(project.id);
+                                            
+                                            return (
+                                                <div key={project.id} style={{ 
+                                                    marginBottom: '12px', 
+                                                    padding: '12px', 
+                                                    background: darkMode ? '#1a1a1a' : '#f5f5f3',
+                                                    borderRadius: '8px',
+                                                    opacity: 0.7
+                                                }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div>
+                                                            <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '600' }}>
+                                                                ✓ {project.name}
+                                                            </h4>
+                                                            <div style={{ fontSize: '12px', color: '#737373' }}>
+                                                                Terminé le {new Date(project.completedAt).toLocaleDateString('fr-FR')}
+                                                            </div>
+                                                            <div style={{ marginTop: '4px' }}>
+                                                                {parseFloat(hours.total) > 0 ? (
+                                                                    <>
+                                                                        <div style={{ fontSize: '13px', fontWeight: '600', color: darkMode ? '#d4d4d2' : '#525252', marginBottom: '2px' }}>
+                                                                            ⏱️ {hours.total}h
+                                                                        </div>
+                                                                        <div style={{ fontSize: '11px', color: '#737373' }}>
+                                                                            {hours.deep}h de deep work • {hours.shallow}h de shallow work
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <div style={{ fontSize: '12px', color: '#737373' }}>
+                                                                        ⏱️ 0h passée sur ce projet
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button 
+                                                                onClick={() => uncompleteProject(project.id)}
+                                                                className="button-text"
+                                                                style={{ fontSize: '11px' }}
+                                                            >
+                                                                Réactiver
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => deleteProject(project.id)}
+                                                                className="button-text"
+                                                                style={{ fontSize: '11px', color: '#7f1d1d' }}
+                                                            >
+                                                                Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card">
+                        <div className="section-header">
+                            <div className="section-label">Historique</div>
+                            {sessions.length > 0 && (
+                                <button onClick={clearHistory} className="button-text">
+                                    Effacer
+                                </button>
+                            )}
+                        </div>
+                        {sessions.length === 0 ? (
+                            <div className="empty-state">Aucune session enregistrée</div>
+                        ) : (
+                            <div>
+                                {Object.entries(groupSessionsByDay()).map(([date, daySessions]) => (
+                                    <div key={date}>
+                                        <div className="day-separator">{date}</div>
+                                        <div className="session-list">
+                                            {daySessions.map((session) => (
+                                                <div key={session.realIndex} className="session-item">
+                                                    <div className="session-info">
+                                                        <span className="session-type">
+                                                            {session.type === 'deep' ? 'DEEP' : 'SHALLOW'}
+                                                        </span>
+                                                        <div>
+                                                            <div className="session-time">
+                                                                {new Date(session.start).toLocaleTimeString('fr-FR', {
+                                                                    hour: '2-digit',
+                                                                    minute: '2-digit'
+                                                                })}
+                                                            </div>
+                                                            <div className="session-duration">
+                                                                {formatDuration(session.duration)}
+                                                                {session.manual && <span className="session-badge" style={{ marginLeft: '8px' }}>Manuel</span>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button onClick={() => deleteSession(session.realIndex)} className="delete-button">
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="card">
+                        <div className="section-label">Base scientifique</div>
+                        <div style={{ fontSize: '13px', lineHeight: '1.7' }}>
+                            <p style={{ marginBottom: '12px' }}>
+                                <strong>Deep Work :</strong> 4 heures max par jour (Cal Newport, Anders Ericsson)
+                            </p>
+                            <p style={{ marginBottom: '12px' }}>
+                                <strong>Shallow Work :</strong> Jusqu'à 4 heures de tâches administratives par jour
+                            </p>
+                            <p style={{ marginBottom: '12px' }}>
+                                <strong>Total optimal :</strong> 7-8 heures de travail productif par jour
+                            </p>
+                            <p>
+                                <strong>Repos :</strong> Essentiel pour maintenir la performance cognitive
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<AttentionTracker />, document.getElementById('root'));
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker enregistré avec succès:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Échec de l\'enregistrement du Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Détection de l'installation sur iOS
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('App installable');
+        });
+        
+        // Détection si déjà installé
+        window.addEventListener('appinstalled', () => {
+            console.log('App installée avec succès');
+            deferredPrompt = null;
+        });
+        
+        // Support pour iOS standalone mode
+        if (window.navigator.standalone) {
+            console.log('Application lancée en mode standalone sur iOS');
+        }
+    </script>
+</body>
+</html>
