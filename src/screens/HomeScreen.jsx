@@ -86,10 +86,10 @@ export const HomeScreen = () => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors pb-safe`}>
       {/* Header */}
-      <div className="max-w-4xl mx-auto px-4 py-4 md:p-6">
-        <div className="flex justify-between items-center mb-4 md:mb-8">
+      <div className="max-w-4xl mx-auto px-3 py-3 md:p-6">
+        <div className="flex justify-between items-center mb-3 md:mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-semibold mb-1">Beamo</h1>
             <p className={`text-xs md:text-sm ${darkMode ? 'text-zinc-500' : 'text-zinc-600'}`}>
@@ -113,7 +113,7 @@ export const HomeScreen = () => {
         </div>
 
         {/* Timer Card */}
-        <div className={`p-8 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'} mb-6`}>
+        <div className={`p-4 md:p-8 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'} mb-3 md:mb-6`}>
           {/* Work Type Selector */}
           <div className="flex gap-3 mb-6">
             <button
@@ -145,8 +145,8 @@ export const HomeScreen = () => {
           </div>
 
           {/* Timer Display */}
-          <div className="text-center mb-6">
-            <div className="text-7xl font-mono font-semibold mb-2">
+          <div className="text-center mb-4 md:mb-6">
+            <div className="text-5xl md:text-7xl font-mono font-semibold mb-2">
               {formatDuration(elapsedTime)}
             </div>
             {isPaused && (
@@ -188,17 +188,17 @@ export const HomeScreen = () => {
         </div>
 
         {/* Manual Session Entry */}
-        <div className="mb-6">
+        <div className="mb-3 md:mb-6">
           <ManualSessionEntry darkMode={darkMode} onAddSession={addSession} projects={projects} />
         </div>
 
         {/* Monthly Stats */}
-        <div className="mb-6">
+        <div className="mb-3 md:mb-6">
           <MonthlyStats dailyStats={dailyStats} darkMode={darkMode} />
         </div>
 
         {/* XP Gauge */}
-        <div className="mb-6">
+        <div className="mb-3 md:mb-6">
           <XPGauge
             dailyStats={dailyStats}
             darkMode={darkMode}
@@ -206,12 +206,12 @@ export const HomeScreen = () => {
         </div>
 
         {/* Calendar 365 */}
-        <div className="mb-6">
+        <div className="mb-3 md:mb-6">
           <Calendar365 dailyStats={dailyStats} darkMode={darkMode} />
         </div>
 
         {/* Projects */}
-        <div className="mb-6">
+        <div className="mb-3 md:mb-6">
           <Projects
             projects={projects}
             sessions={sessions}
