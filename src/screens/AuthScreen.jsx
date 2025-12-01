@@ -33,7 +33,7 @@ export const AuthScreen = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-semibold mb-2">⏱️</h1>
-          <h2 className="text-2xl font-semibold mb-2">Attention Tracker</h2>
+          <h2 className="text-2xl font-semibold mb-2">Beamo</h2>
           <p className="text-zinc-500 text-sm">Deep Work & Shallow Work</p>
         </div>
 
