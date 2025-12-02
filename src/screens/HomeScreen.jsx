@@ -92,9 +92,9 @@ export const HomeScreen = () => {
         <div className="flex justify-between items-center mb-3 md:mb-8">
           <div className="flex items-center gap-3">
             <img
-              src="/icon-192.png"
+              src="/icon.svg"
               alt="Beamo Logo"
-              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl"
+              className="w-12 h-12 md:w-14 md:h-14"
             />
             <div>
               <h1 className="text-3xl md:text-4xl font-semibold mb-1">Beamo</h1>

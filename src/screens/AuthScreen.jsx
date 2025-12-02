@@ -34,9 +34,9 @@ export const AuthScreen = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img
-              src="/icon-192.png"
+              src="/icon.svg"
               alt="Beamo Logo"
-              className="w-20 h-20 rounded-2xl"
+              className="w-20 h-20"
             />
           </div>
           <h2 className="text-2xl font-semibold mb-2">Beamo</h2>
