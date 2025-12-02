@@ -59,10 +59,6 @@ export const MonthlyStats = ({ dailyStats, darkMode }) => {
 
   return (
     <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <h2 className="text-xs md:text-sm font-medium mb-3 md:mb-4 uppercase tracking-wider opacity-60">
-        {monthName}
-      </h2>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Graphique - 2/3 de l'espace */}
         <div className="lg:col-span-2">
