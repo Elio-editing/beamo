@@ -58,12 +58,12 @@ export const MonthlyStats = ({ dailyStats, darkMode }) => {
   const monthName = new Date(now.getFullYear(), now.getMonth(), 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
   return (
-    <div className={`p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <h2 className="text-sm font-medium mb-4 uppercase tracking-wider opacity-60">
+    <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
+      <h2 className="text-xs md:text-sm font-medium mb-3 md:mb-4 uppercase tracking-wider opacity-60">
         {monthName}
       </h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Graphique - 2/3 de l'espace */}
         <div className="lg:col-span-2">
           <div className="relative h-48">
@@ -139,42 +139,42 @@ export const MonthlyStats = ({ dailyStats, darkMode }) => {
         </div>
 
         {/* Moyennes - 1/3 de l'espace */}
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           <div>
-            <div className="text-xs opacity-60 mb-2 uppercase tracking-wider">Moyennes journalières</div>
+            <div className="text-[10px] md:text-xs opacity-60 mb-2 uppercase tracking-wider">Moyennes journalières</div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               <div>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-sm opacity-60">Deep Work</span>
-                  <span className="text-2xl font-semibold text-green-500">{avgDeep.toFixed(1)}h</span>
+                  <span className="text-xs md:text-sm opacity-60">Deep Work</span>
+                  <span className="text-xl md:text-2xl font-semibold text-green-500">{avgDeep.toFixed(1)}h</span>
                 </div>
               </div>
 
               <div>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-sm opacity-60">Shallow Work</span>
-                  <span className="text-2xl font-semibold text-purple-500">{avgShallow.toFixed(1)}h</span>
+                  <span className="text-xs md:text-sm opacity-60">Shallow Work</span>
+                  <span className="text-xl md:text-2xl font-semibold text-purple-500">{avgShallow.toFixed(1)}h</span>
                 </div>
               </div>
 
-              <div className={`pt-3 border-t ${darkMode ? 'border-zinc-800' : 'border-zinc-200'}`}>
+              <div className={`pt-2 md:pt-3 border-t ${darkMode ? 'border-zinc-800' : 'border-zinc-200'}`}>
                 <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-sm opacity-60">Total</span>
-                  <span className="text-2xl font-semibold">{avgTotal.toFixed(1)}h</span>
+                  <span className="text-xs md:text-sm opacity-60">Total</span>
+                  <span className="text-xl md:text-2xl font-semibold">{avgTotal.toFixed(1)}h</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Total mensuel */}
-          <div className={`p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
-            <div className="text-xs opacity-40 mb-1">Total du mois</div>
+          <div className={`p-2 md:p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+            <div className="text-[10px] md:text-xs opacity-40 mb-1">Total du mois</div>
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-semibold">{totalHours.toFixed(1)}h</span>
-              <span className="text-xs opacity-40">sur {daysWithData} jours</span>
+              <span className="text-base md:text-lg font-semibold">{totalHours.toFixed(1)}h</span>
+              <span className="text-[10px] md:text-xs opacity-40">sur {daysWithData} jours</span>
             </div>
-            <div className="flex gap-2 mt-2 text-xs">
+            <div className="flex gap-2 mt-1 md:mt-2 text-[10px] md:text-xs">
               <span className="text-green-500">{totalDeep.toFixed(1)}h Deep</span>
               <span className="opacity-20">•</span>
               <span className="text-purple-500">{totalShallow.toFixed(1)}h Shallow</span>
