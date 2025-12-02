@@ -63,6 +63,6 @@ export const getHeatmapColor = (hours, darkMode = true, deepHours = 0) => {
   if (hours === 0) return darkMode ? '#27272a' : '#e4e4e7'; // Gris - pas de travail
   if (hours < 3) return darkMode ? '#991b1b' : '#fca5a5'; // Rouge foncé - très insuffisant
   if (hours < 4.5) return darkMode ? '#dc2626' : '#f87171'; // Rouge - insuffisant
-  if (hours < 6.5) return darkMode ? '#f97316' : '#fb923c'; // Orange - moyen
-  return darkMode ? '#f59e0b' : '#fbbf24'; // Jaune/orange - bon
+  if (hours < 6.5) return darkMode ? '#ea580c' : '#fb923c'; // Orange vif - moyen
+  return darkMode ? '#eab308' : '#facc15'; // Jaune citron - bon (bien visible vs orange)
 };
