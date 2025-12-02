@@ -52,9 +52,9 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
   };
 
   return (
-    <div className={`p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-sm font-medium uppercase tracking-wider opacity-60">
+    <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
+      <div className="flex justify-between items-center mb-3 md:mb-4">
+        <h2 className="text-xs md:text-sm font-medium uppercase tracking-wider opacity-60">
           Ajouter une session
         </h2>
         <button
@@ -72,10 +72,10 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="space-y-4 animate-fadeIn">
+        <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4 animate-fadeIn">
           {/* Type de travail */}
           <div>
-            <label className="block text-sm opacity-60 mb-2">Type de travail</label>
+            <label className="block text-xs md:text-sm opacity-60 mb-2">Type de travail</label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -109,11 +109,11 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
           {/* Projet (optionnel) */}
           {projects.length > 0 && (
             <div>
-              <label className="block text-sm opacity-60 mb-2">Projet (optionnel)</label>
+              <label className="block text-xs md:text-sm opacity-60 mb-2">Projet (optionnel)</label>
               <select
                 value={formData.projectId || ''}
                 onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
-                className={`w-full px-4 py-2 rounded-xl outline-none ${
+                className={`w-full px-3 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
                   darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
                 }`}
               >
@@ -129,13 +129,13 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
 
           {/* Date */}
           <div>
-            <label className="block text-sm opacity-60 mb-2">Date</label>
+            <label className="block text-xs md:text-sm opacity-60 mb-2">Date</label>
             <input
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               max={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-2 rounded-xl outline-none ${
+              className={`w-full px-2 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
                 darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
               }`}
               required
@@ -144,12 +144,12 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
 
           {/* Heure de début */}
           <div>
-            <label className="block text-sm opacity-60 mb-2">Heure de début</label>
+            <label className="block text-xs md:text-sm opacity-60 mb-2">Heure de début</label>
             <input
               type="time"
               value={formData.startTime}
               onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-              className={`w-full px-4 py-2 rounded-xl outline-none ${
+              className={`w-full px-2 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
                 darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
               }`}
               required
@@ -158,7 +158,7 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
 
           {/* Durée */}
           <div>
-            <label className="block text-sm opacity-60 mb-2">
+            <label className="block text-xs md:text-sm opacity-60 mb-2">
               Durée: {formatDurationInput(formData.duration)}
             </label>
             <input

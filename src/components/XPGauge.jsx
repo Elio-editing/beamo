@@ -80,37 +80,38 @@ export const XPGauge = ({ dailyStats, darkMode }) => {
   const RankIcon = rank.icon;
 
   return (
-    <div className={`p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
-      <h2 className="text-sm font-medium mb-4 uppercase tracking-wider opacity-60">
+    <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
+      <h2 className="text-xs md:text-sm font-medium mb-3 md:mb-4 uppercase tracking-wider opacity-60">
         Saison en cours
       </h2>
 
       {/* Niveau et rang */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
         <div className="relative">
           <div
-            className="w-20 h-20 rounded-full flex items-center justify-center border-4"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center border-4"
             style={{ borderColor: rank.color }}
           >
             <div className="text-center">
-              <div className="text-xs opacity-60">NIV</div>
-              <div className="text-2xl font-bold">{currentLevel}</div>
+              <div className="text-[10px] md:text-xs opacity-60">NIV</div>
+              <div className="text-xl md:text-2xl font-bold">{currentLevel}</div>
             </div>
           </div>
           <div
-            className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center"
+            className="absolute -bottom-1 -right-1 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center"
             style={{ backgroundColor: rank.color }}
           >
-            <RankIcon size={16} className="text-white" />
+            <RankIcon size={14} className="text-white md:hidden" />
+            <RankIcon size={16} className="text-white hidden md:block" />
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold text-lg" style={{ color: rank.color }}>{rank.name}</span>
+            <span className="font-bold text-base md:text-lg truncate" style={{ color: rank.color }}>{rank.name}</span>
             <span className="text-xs opacity-40">#{currentLevel}</span>
           </div>
-          <div className="text-xs opacity-60 mb-2">
+          <div className="text-[10px] md:text-xs opacity-60 mb-2">
             {currentLevelXP.toFixed(0)} / {xpForNextLevel.toFixed(0)} XP
           </div>
 
@@ -129,21 +130,21 @@ export const XPGauge = ({ dailyStats, darkMode }) => {
       </div>
 
       {/* Stats de la saison */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className={`p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
-          <div className="text-xs opacity-40 mb-1">XP Total</div>
-          <div className="text-2xl font-bold">{totalXP.toFixed(0)}</div>
+      <div className="grid grid-cols-2 gap-2 md:gap-3">
+        <div className={`p-2 md:p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+          <div className="text-[10px] md:text-xs opacity-40 mb-1">XP Total</div>
+          <div className="text-xl md:text-2xl font-bold">{totalXP.toFixed(0)}</div>
         </div>
 
-        <div className={`p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
-          <div className="text-xs opacity-40 mb-1">Fin de saison</div>
-          <div className="text-lg font-semibold">{Math.ceil((seasonEnd - new Date()) / (1000 * 60 * 60 * 24))}j</div>
+        <div className={`p-2 md:p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+          <div className="text-[10px] md:text-xs opacity-40 mb-1">Fin de saison</div>
+          <div className="text-base md:text-lg font-semibold">{Math.ceil((seasonEnd - new Date()) / (1000 * 60 * 60 * 24))}j</div>
         </div>
       </div>
 
       {/* Info XP */}
-      <div className={`mt-4 p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
-        <div className="text-xs opacity-60 space-y-1">
+      <div className={`mt-3 md:mt-4 p-2 md:p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-white'} border ${darkMode ? 'border-zinc-700' : 'border-zinc-200'}`}>
+        <div className="text-[10px] md:text-xs opacity-60 space-y-1">
           <div>• Deep Work: <span className="text-green-500 font-medium">100 XP/h</span></div>
           <div>• Shallow Work: <span className="text-purple-500 font-medium">50 XP/h</span></div>
           <div>• Objectif atteint: <span className="text-yellow-500 font-medium">+200 XP</span></div>
