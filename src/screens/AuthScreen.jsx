@@ -32,7 +32,13 @@ export const AuthScreen = () => {
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-semibold mb-2">⏱️</h1>
+          <div className="flex justify-center mb-4">
+            <img
+              src="/icon-192.png"
+              alt="Beamo Logo"
+              className="w-20 h-20 rounded-2xl"
+            />
+          </div>
           <h2 className="text-2xl font-semibold mb-2">Beamo</h2>
           <p className="text-zinc-500 text-sm">Deep Work & Shallow Work</p>
         </div>

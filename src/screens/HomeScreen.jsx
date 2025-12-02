@@ -90,11 +90,18 @@ export const HomeScreen = () => {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-3 py-3 md:p-6">
         <div className="flex justify-between items-center mb-3 md:mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-semibold mb-1">Beamo</h1>
-            <p className={`text-xs md:text-sm ${darkMode ? 'text-zinc-500' : 'text-zinc-600'}`}>
-              Deep Work & Shallow Work
-            </p>
+          <div className="flex items-center gap-3">
+            <img
+              src="/icon-192.png"
+              alt="Beamo Logo"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-2xl"
+            />
+            <div>
+              <h1 className="text-3xl md:text-4xl font-semibold mb-1">Beamo</h1>
+              <p className={`text-xs md:text-sm ${darkMode ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                Deep Work & Shallow Work
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button
