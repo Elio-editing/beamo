@@ -53,16 +53,16 @@ export const getLast365Days = () => {
   return days;
 };
 
-// Get color for heatmap based on hours (rouge → jaune, optimal à 6h deep OU 8h total)
+// Get color for heatmap based on hours (rouge → jaune, optimal à 7h deep OU 10h total)
 export const getHeatmapColor = (hours, darkMode = true, deepHours = 0) => {
-  // Optimal si 6h+ de deep work OU 8h+ total
-  if (deepHours >= 6 || hours >= 8) {
+  // Optimal si 7h+ de deep work OU 10h+ total (très difficile)
+  if (deepHours >= 7 || hours >= 10) {
     return darkMode ? '#fde047' : '#fef08a'; // Jaune vif clair style Vox - optimal
   }
 
   if (hours === 0) return darkMode ? '#27272a' : '#e4e4e7'; // Gris - pas de travail
-  if (hours < 2) return darkMode ? '#991b1b' : '#fca5a5'; // Rouge foncé - très insuffisant
-  if (hours < 3) return darkMode ? '#dc2626' : '#f87171'; // Rouge - insuffisant
-  if (hours < 4.5) return darkMode ? '#f97316' : '#fb923c'; // Orange - moyen
+  if (hours < 3) return darkMode ? '#991b1b' : '#fca5a5'; // Rouge foncé - très insuffisant
+  if (hours < 4.5) return darkMode ? '#dc2626' : '#f87171'; // Rouge - insuffisant
+  if (hours < 6.5) return darkMode ? '#f97316' : '#fb923c'; // Orange - moyen
   return darkMode ? '#f59e0b' : '#fbbf24'; // Jaune/orange - bon
 };

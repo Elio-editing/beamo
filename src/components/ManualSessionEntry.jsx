@@ -6,7 +6,6 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
   const [formData, setFormData] = useState({
     type: 'deep',
     date: new Date().toISOString().split('T')[0],
-    startTime: '09:00',
     duration: 60, // en minutes
     projectId: null // projet optionnel
   });
@@ -14,8 +13,8 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Créer le timestamp de début
-    const startDate = new Date(`${formData.date}T${formData.startTime}`);
+    // Créer le timestamp de début (milieu de journée par défaut)
+    const startDate = new Date(`${formData.date}T12:00:00`);
     const start = startDate.getTime();
     const duration = formData.duration * 60; // convertir en secondes
     const end = start + (duration * 1000);
@@ -36,7 +35,6 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
     setFormData({
       type: 'deep',
       date: new Date().toISOString().split('T')[0],
-      startTime: '09:00',
       duration: 60,
       projectId: null
     });
@@ -135,20 +133,6 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               max={new Date().toISOString().split('T')[0]}
-              className={`w-full px-2 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
-                darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
-              }`}
-              required
-            />
-          </div>
-
-          {/* Heure de début */}
-          <div>
-            <label className="block text-xs md:text-sm opacity-60 mb-2">Heure de début</label>
-            <input
-              type="time"
-              value={formData.startTime}
-              onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
               className={`w-full px-2 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
                 darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
               }`}
