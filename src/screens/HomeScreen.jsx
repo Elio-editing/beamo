@@ -86,7 +86,7 @@ export const HomeScreen = () => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors pb-safe`}>
+    <div className={`min-h-screen overflow-x-hidden ${darkMode ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors pb-safe`}>
       {/* Header */}
       <div className="max-w-4xl mx-auto px-3 py-3 md:p-6">
         <div className="flex justify-between items-center mb-3 md:mb-8">

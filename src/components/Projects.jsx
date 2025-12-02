@@ -173,7 +173,7 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
             value={newProject.name}
             onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
             placeholder="Nom du projet"
-            className={`w-full px-4 py-2 rounded-xl outline-none ${
+            className={`w-full px-3 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
               darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
             }`}
             required
@@ -184,7 +184,7 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
               type="date"
               value={newProject.deadline}
               onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
-              className={`w-full px-4 py-2 rounded-xl outline-none ${
+              className={`w-full px-2 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
                 darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
               }`}
               required
@@ -195,7 +195,7 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
             onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
             placeholder="Description (optionnel)"
             rows={2}
-            className={`w-full px-4 py-2 rounded-xl outline-none resize-none ${
+            className={`w-full px-3 md:px-4 py-2 rounded-xl outline-none resize-none text-sm md:text-base ${
               darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
             }`}
           />
