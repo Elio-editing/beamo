@@ -64,6 +64,11 @@ export const HomeScreen = () => {
   };
 
   const stopSession = () => {
+    // Mettre en pause le timer si pas déjà en pause
+    if (!isPaused) {
+      setPauseStartTime(Date.now());
+      setIsPaused(true);
+    }
     setShowStopModal(true);
   };
 
@@ -90,6 +95,24 @@ export const HomeScreen = () => {
   };
 
   const cancelStopSession = () => {
+    // Reprendre le timer si on avait mis en pause
+    if (isPaused && pauseStartTime) {
+      setPausedTime(pausedTime + (Date.now() - pauseStartTime));
+      setPauseStartTime(null);
+      setIsPaused(false);
+    }
+    setShowStopModal(false);
+    setSelectedProjectId(null);
+  };
+
+  const discardSession = () => {
+    // Annuler complètement la session sans sauvegarder
+    setIsTracking(false);
+    setIsPaused(false);
+    setElapsedTime(0);
+    setSessionStart(null);
+    setPausedTime(0);
+    setPauseStartTime(null);
     setShowStopModal(false);
     setSelectedProjectId(null);
   };
@@ -297,22 +320,30 @@ export const HomeScreen = () => {
               </select>
             </div>
 
-            <div className="flex gap-3">
+            <div className="space-y-2">
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelStopSession}
+                  className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+                    darkMode
+                      ? 'bg-zinc-800 hover:bg-zinc-700'
+                      : 'bg-zinc-200 hover:bg-zinc-300'
+                  }`}
+                >
+                  Continuer
+                </button>
+                <button
+                  onClick={confirmStopSession}
+                  className="flex-1 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+                >
+                  Sauvegarder
+                </button>
+              </div>
               <button
-                onClick={cancelStopSession}
-                className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
-                  darkMode
-                    ? 'bg-zinc-800 hover:bg-zinc-700'
-                    : 'bg-zinc-200 hover:bg-zinc-300'
-                }`}
+                onClick={discardSession}
+                className="w-full py-3 bg-red-500/10 text-red-500 rounded-xl font-medium hover:bg-red-500/20 transition-colors border border-red-500/30"
               >
-                Annuler
-              </button>
-              <button
-                onClick={confirmStopSession}
-                className="flex-1 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
-              >
-                Confirmer
+                Annuler la session
               </button>
             </div>
           </div>
