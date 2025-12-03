@@ -78,10 +78,10 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
         <span className="text-[10px] md:text-xs">Moins</span>
         <div className="flex gap-1">
           <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded ${darkMode ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
-          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(1, darkMode, 0) }} />
-          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(2.5, darkMode, 0) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(2, darkMode, 0) }} />
           <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(4, darkMode, 0) }} />
-          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(8, darkMode, 6) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(5.5, darkMode, 0) }} />
+          <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded" style={{ backgroundColor: getHeatmapColor(7, darkMode, 0) }} />
         </div>
         <span className="text-[10px] md:text-xs">Plus</span>
       </div>
