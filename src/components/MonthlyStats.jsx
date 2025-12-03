@@ -30,12 +30,20 @@ export const MonthlyStats = ({ dailyStats, darkMode }) => {
     const tShallow = data.reduce((sum, d) => sum + d.shallow, 0);
     const tHours = tDeep + tShallow;
     const daysData = data.filter(d => d.total > 0).length;
-    // Moyenne sur tous les jours du mois (jusqu'à aujourd'hui)
+
+    // Moyenne sur les jours PRÉCÉDENTS uniquement (exclu aujourd'hui)
     const todayDay = new Date().getDate();
-    const daysToConsider = Math.min(todayDay, daysInMonth);
-    const aDeep = tDeep / daysToConsider;
-    const aShallow = tShallow / daysToConsider;
-    const aTotal = tHours / daysToConsider;
+    const daysToConsider = Math.max(1, todayDay - 1); // Jours avant aujourd'hui (minimum 1 pour éviter division par 0)
+
+    // Calculer totaux sans aujourd'hui
+    const dataWithoutToday = data.filter(d => d.day < todayDay);
+    const tDeepPrev = dataWithoutToday.reduce((sum, d) => sum + d.deep, 0);
+    const tShallowPrev = dataWithoutToday.reduce((sum, d) => sum + d.shallow, 0);
+    const tHoursPrev = tDeepPrev + tShallowPrev;
+
+    const aDeep = tDeepPrev / daysToConsider;
+    const aShallow = tShallowPrev / daysToConsider;
+    const aTotal = tHoursPrev / daysToConsider;
 
     return {
       monthData: data,
