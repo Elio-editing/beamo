@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Clock, Trash2, Calendar as CalendarIcon } from 'lucide-react';
+import { Clock, Trash2, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
 import { formatDuration, getDateKey } from '../utils/helpers';
 
-export const SessionHistory = ({ sessions, darkMode, onDeleteSession }) => {
+export const SessionHistory = ({ sessions, darkMode, onDeleteSession, onUpdateSession }) => {
   const [filter, setFilter] = useState('all'); // all, deep, shallow
   const [selectedDate, setSelectedDate] = useState('');
 
@@ -52,6 +52,12 @@ export const SessionHistory = ({ sessions, darkMode, onDeleteSession }) => {
 
   // Get unique dates for date filter
   const uniqueDates = [...new Set(sessions.map(s => getDateKey(s.start)))].sort().reverse();
+
+  // Toggle session type
+  const toggleSessionType = async (sessionId, currentType) => {
+    const newType = currentType === 'deep' ? 'shallow' : 'deep';
+    await onUpdateSession(sessionId, { type: newType });
+  };
 
   return (
     <div className={`p-4 md:p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-zinc-50 border border-zinc-200'}`}>
@@ -168,13 +174,27 @@ export const SessionHistory = ({ sessions, darkMode, onDeleteSession }) => {
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => onDeleteSession(session.id)}
-                          className="p-1.5 md:p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500 flex-shrink-0"
-                        >
-                          <Trash2 size={12} className="md:hidden" />
-                          <Trash2 size={14} className="hidden md:block" />
-                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={() => toggleSessionType(session.id, session.type)}
+                            className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+                              session.type === 'deep'
+                                ? 'hover:bg-purple-500/10 text-purple-500'
+                                : 'hover:bg-green-500/10 text-green-500'
+                            }`}
+                            title={`Changer en ${session.type === 'deep' ? 'Shallow Work' : 'Deep Work'}`}
+                          >
+                            <RefreshCw size={12} className="md:hidden" />
+                            <RefreshCw size={14} className="hidden md:block" />
+                          </button>
+                          <button
+                            onClick={() => onDeleteSession(session.id)}
+                            className="p-1.5 md:p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500"
+                          >
+                            <Trash2 size={12} className="md:hidden" />
+                            <Trash2 size={14} className="hidden md:block" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                 </div>

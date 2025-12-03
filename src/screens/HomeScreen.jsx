@@ -12,7 +12,7 @@ import { MonthlyStats } from '../components/MonthlyStats';
 
 export const HomeScreen = () => {
   const { user, logout } = useAuth();
-  const { sessions, projects, dailyStats, attentionLevel, darkMode, toggleDarkMode, addSession, deleteSession, addProject, updateProject, deleteProject, updateAttentionLevel } = useData();
+  const { sessions, projects, dailyStats, attentionLevel, darkMode, toggleDarkMode, addSession, updateSession, deleteSession, addProject, updateProject, deleteProject, updateAttentionLevel } = useData();
 
   // Timer state
   const [isTracking, setIsTracking] = useState(false);
@@ -22,6 +22,10 @@ export const HomeScreen = () => {
   const [sessionStart, setSessionStart] = useState(null);
   const [pausedTime, setPausedTime] = useState(0);
   const [pauseStartTime, setPauseStartTime] = useState(null);
+
+  // Stop session modal state
+  const [showStopModal, setShowStopModal] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   // Stats
   const todayKey = getTodayKey();
@@ -59,14 +63,19 @@ export const HomeScreen = () => {
     }
   };
 
-  const stopSession = async () => {
+  const stopSession = () => {
+    setShowStopModal(true);
+  };
+
+  const confirmStopSession = async () => {
     const duration = elapsedTime;
     const session = {
       type: workType,
       start: sessionStart,
       duration,
       end: Date.now(),
-      pausedDuration: Math.floor(pausedTime / 1000)
+      pausedDuration: Math.floor(pausedTime / 1000),
+      projectId: selectedProjectId || null
     };
 
     await addSession(session);
@@ -76,6 +85,13 @@ export const HomeScreen = () => {
     setElapsedTime(0);
     setSessionStart(null);
     setPausedTime(0);
+    setShowStopModal(false);
+    setSelectedProjectId(null);
+  };
+
+  const cancelStopSession = () => {
+    setShowStopModal(false);
+    setSelectedProjectId(null);
   };
 
   const handleToggleProject = async (projectId) => {
@@ -235,8 +251,73 @@ export const HomeScreen = () => {
           sessions={sessions}
           darkMode={darkMode}
           onDeleteSession={deleteSession}
+          onUpdateSession={updateSession}
         />
       </div>
+
+      {/* Stop Session Modal */}
+      {showStopModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className={`max-w-md w-full p-6 rounded-2xl ${darkMode ? 'bg-zinc-900 border border-zinc-800' : 'bg-white border border-zinc-200'}`}>
+            <h3 className="text-xl font-semibold mb-4">Terminer la session</h3>
+
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                  workType === 'deep'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-purple-500 text-white'
+                }`}>
+                  {workType === 'deep' ? '🧠 Deep Work' : '⚡ Shallow Work'}
+                </span>
+                <span className="text-2xl font-mono font-semibold">
+                  {formatDuration(elapsedTime)}
+                </span>
+              </div>
+
+              <p className="text-sm opacity-60 mb-4">
+                Voulez-vous associer cette session à un projet ?
+              </p>
+
+              <select
+                value={selectedProjectId || ''}
+                onChange={(e) => setSelectedProjectId(e.target.value || null)}
+                className={`w-full px-4 py-3 rounded-xl outline-none ${
+                  darkMode
+                    ? 'bg-zinc-800 border border-zinc-700'
+                    : 'bg-zinc-50 border border-zinc-200'
+                }`}
+              >
+                <option value="">Aucun projet (optionnel)</option>
+                {projects.filter(p => !p.completed).map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={cancelStopSession}
+                className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+                  darkMode
+                    ? 'bg-zinc-800 hover:bg-zinc-700'
+                    : 'bg-zinc-200 hover:bg-zinc-300'
+                }`}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmStopSession}
+                className="flex-1 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors"
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
