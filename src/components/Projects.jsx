@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp, Edit2, Save, X, ArrowUp, ArrowDown } from 'lucide-react';
 
 export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDeleteProject, onToggleProject, onUpdateProject }) => {
   const [showForm, setShowForm] = useState(false);
@@ -8,6 +8,8 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
   const [expandedProject, setExpandedProject] = useState(null);
   const [newSubtask, setNewSubtask] = useState('');
   const [completingProject, setCompletingProject] = useState(null);
+  const [editingProject, setEditingProject] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', deadline: '', description: '' });
 
   // Gérer la complétion avec animation
   const handleCompleteProject = async (projectId, isCurrentlyCompleted) => {
@@ -119,6 +121,54 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
       const updatedSubtasks = (project.subtasks || []).filter(st => st.id !== subtaskId);
       await onUpdateProject(projectId, { subtasks: updatedSubtasks });
     }
+  };
+
+  // Édition de projet
+  const startEditingProject = (project) => {
+    setEditingProject(project.id);
+    setEditForm({
+      name: project.name,
+      deadline: project.deadline,
+      description: project.description || ''
+    });
+  };
+
+  const cancelEditingProject = () => {
+    setEditingProject(null);
+    setEditForm({ name: '', deadline: '', description: '' });
+  };
+
+  const saveProjectEdit = async (projectId) => {
+    if (editForm.name && editForm.deadline) {
+      await onUpdateProject(projectId, {
+        name: editForm.name,
+        deadline: editForm.deadline,
+        description: editForm.description
+      });
+      setEditingProject(null);
+      setEditForm({ name: '', deadline: '', description: '' });
+    }
+  };
+
+  // Réorganisation des sous-tâches
+  const moveSubtaskUp = async (projectId, subtaskIndex) => {
+    if (subtaskIndex === 0) return;
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      const updatedSubtasks = [...(project.subtasks || [])];
+      [updatedSubtasks[subtaskIndex - 1], updatedSubtasks[subtaskIndex]] =
+      [updatedSubtasks[subtaskIndex], updatedSubtasks[subtaskIndex - 1]];
+      await onUpdateProject(projectId, { subtasks: updatedSubtasks });
+    }
+  };
+
+  const moveSubtaskDown = async (projectId, subtaskIndex) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project || subtaskIndex >= (project.subtasks || []).length - 1) return;
+    const updatedSubtasks = [...(project.subtasks || [])];
+    [updatedSubtasks[subtaskIndex + 1], updatedSubtasks[subtaskIndex]] =
+    [updatedSubtasks[subtaskIndex], updatedSubtasks[subtaskIndex + 1]];
+    await onUpdateProject(projectId, { subtasks: updatedSubtasks });
   };
 
   const getDaysUntilDeadline = (deadline) => {
@@ -236,35 +286,88 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCompleteProject(project.id, project.completed);
-                      }}
-                      className={`hover:opacity-70 transition-opacity ${
-                        completingProject === project.id ? 'animate-completion-bounce' : ''
-                      }`}
-                    >
-                      {project.completed || completingProject === project.id ? (
-                        <div className={`text-green-500 ${completingProject === project.id ? 'animate-check-scale' : ''}`}>
-                          <AnimatedCheck isAnimating={completingProject === project.id} />
-                        </div>
-                      ) : (
-                        <Circle size={20} className="text-zinc-400" />
+                  {editingProject === project.id ? (
+                    // Mode édition
+                    <div className="space-y-2 animate-fadeIn">
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        placeholder="Nom du projet"
+                        className={`w-full px-3 py-2 rounded-lg outline-none text-sm ${
+                          darkMode ? 'bg-zinc-700 border border-zinc-600' : 'bg-zinc-100 border border-zinc-300'
+                        }`}
+                      />
+                      <input
+                        type="date"
+                        value={editForm.deadline}
+                        onChange={(e) => setEditForm({ ...editForm, deadline: e.target.value })}
+                        className={`w-full px-3 py-2 rounded-lg outline-none text-sm ${
+                          darkMode ? 'bg-zinc-700 border border-zinc-600' : 'bg-zinc-100 border border-zinc-300'
+                        }`}
+                      />
+                      <textarea
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        placeholder="Description (optionnel)"
+                        rows={2}
+                        className={`w-full px-3 py-2 rounded-lg outline-none resize-none text-sm ${
+                          darkMode ? 'bg-zinc-700 border border-zinc-600' : 'bg-zinc-100 border border-zinc-300'
+                        }`}
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveProjectEdit(project.id)}
+                          className="flex-1 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Save size={14} />
+                          Sauvegarder
+                        </button>
+                        <button
+                          onClick={cancelEditingProject}
+                          className={`flex-1 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-1 ${
+                            darkMode ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-200 hover:bg-zinc-300'
+                          }`}
+                        >
+                          <X size={14} />
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Mode normal
+                    <>
+                      <div className="flex items-center gap-2 mb-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCompleteProject(project.id, project.completed);
+                          }}
+                          className={`hover:opacity-70 transition-opacity ${
+                            completingProject === project.id ? 'animate-completion-bounce' : ''
+                          }`}
+                        >
+                          {project.completed || completingProject === project.id ? (
+                            <div className={`text-green-500 ${completingProject === project.id ? 'animate-check-scale' : ''}`}>
+                              <AnimatedCheck isAnimating={completingProject === project.id} />
+                            </div>
+                          ) : (
+                            <Circle size={20} className="text-zinc-400" />
+                          )}
+                        </button>
+                        <h3 className="font-medium text-sm md:text-base truncate">{project.name}</h3>
+                      </div>
+                      {project.description && (
+                        <p className="text-sm opacity-60 ml-7 mb-2">{project.description}</p>
                       )}
-                    </button>
-                    <h3 className="font-medium text-sm md:text-base truncate">{project.name}</h3>
-                  </div>
-                  {project.description && (
-                    <p className="text-sm opacity-60 ml-7 mb-2">{project.description}</p>
+                      <div className="flex items-center gap-2 ml-7">
+                        <Calendar size={14} className={getDeadlineColor(project.deadline, false)} />
+                        <span className={`text-sm font-medium ${getDeadlineColor(project.deadline, false)}`}>
+                          {formatDeadline(project.deadline)}
+                        </span>
+                      </div>
+                    </>
                   )}
-                  <div className="flex items-center gap-2 ml-7">
-                    <Calendar size={14} className={getDeadlineColor(project.deadline, false)} />
-                    <span className={`text-sm font-medium ${getDeadlineColor(project.deadline, false)}`}>
-                      {formatDeadline(project.deadline)}
-                    </span>
-                  </div>
                   {/* Statistiques du projet */}
                   {(() => {
                     const hours = getProjectHours(project.id);
@@ -282,9 +385,9 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                   })()}
 
                   {/* Sous-tâches */}
-                  {project.subtasks && project.subtasks.length > 0 && (
+                  {editingProject !== project.id && project.subtasks && project.subtasks.length > 0 && (
                     <div className="mt-3 ml-7 space-y-1">
-                      {project.subtasks.map(subtask => (
+                      {project.subtasks.map((subtask, index) => (
                         <div key={subtask.id} className="flex items-center gap-2 group">
                           <button
                             onClick={() => handleToggleSubtask(project.id, subtask.id)}
@@ -296,22 +399,42 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                               <Circle size={14} className="text-zinc-400" />
                             )}
                           </button>
-                          <span className={`text-xs ${subtask.completed ? 'line-through opacity-50' : ''}`}>
+                          <span className={`text-xs flex-1 ${subtask.completed ? 'line-through opacity-50' : ''}`}>
                             {subtask.text}
                           </span>
-                          <button
-                            onClick={() => handleDeleteSubtask(project.id, subtask.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity ml-auto"
-                          >
-                            <Trash2 size={12} className="text-red-500" />
-                          </button>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            <button
+                              onClick={() => moveSubtaskUp(project.id, index)}
+                              disabled={index === 0}
+                              className={`p-1 rounded hover:bg-zinc-700 transition-colors ${
+                                index === 0 ? 'opacity-30 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <ArrowUp size={12} />
+                            </button>
+                            <button
+                              onClick={() => moveSubtaskDown(project.id, index)}
+                              disabled={index === project.subtasks.length - 1}
+                              className={`p-1 rounded hover:bg-zinc-700 transition-colors ${
+                                index === project.subtasks.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <ArrowDown size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSubtask(project.id, subtask.id)}
+                              className="p-1 rounded hover:bg-red-500/10 transition-colors"
+                            >
+                              <Trash2 size={12} className="text-red-500" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
 
                   {/* Formulaire ajout sous-tâche */}
-                  {expandedProject === project.id && (
+                  {editingProject !== project.id && expandedProject === project.id && (
                     <div className="mt-3 ml-7 flex gap-2 animate-fadeIn">
                       <input
                         type="text"
@@ -337,20 +460,30 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                   )}
 
                   {/* Bouton ajouter sous-tâche */}
+                  {editingProject !== project.id && (
+                    <button
+                      onClick={() => handleExpandProject(project.id)}
+                      className={`mt-2 ml-7 text-xs opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1`}
+                    >
+                      <Plus size={12} />
+                      {expandedProject === project.id ? 'Annuler' : 'Ajouter sous-tâche'}
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => handleExpandProject(project.id)}
-                    className={`mt-2 ml-7 text-xs opacity-60 hover:opacity-100 transition-opacity flex items-center gap-1`}
+                    onClick={() => startEditingProject(project)}
+                    className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors text-blue-500"
                   >
-                    <Plus size={12} />
-                    {expandedProject === project.id ? 'Annuler' : 'Ajouter sous-tâche'}
+                    <Edit2 size={16} />
+                  </button>
+                  <button
+                    onClick={() => onDeleteProject(project.id)}
+                    className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </div>
-                <button
-                  onClick={() => onDeleteProject(project.id)}
-                  className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500"
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             </div>
           ))}
