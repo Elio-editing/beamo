@@ -159,16 +159,12 @@ export const SessionHistory = ({ sessions, darkMode, onDeleteSession, onUpdateSe
                                 {session.type === 'deep' ? 'Deep Work' : 'Shallow Work'}
                               </span>
                               <span className="opacity-40">•</span>
-                              <span className="opacity-60 flex-shrink-0">{formatTime(session.start)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] md:text-xs opacity-60 mt-1">
-                              <Clock size={10} className="md:hidden flex-shrink-0" />
-                              <Clock size={12} className="hidden md:block flex-shrink-0" />
-                              <span className="truncate">{formatDuration(session.duration)}</span>
+                              <Clock size={12} className="opacity-60" />
+                              <span className="opacity-60 truncate">{formatDuration(session.duration)}</span>
                               {session.pausedDuration > 0 && (
                                 <>
                                   <span className="opacity-40">•</span>
-                                  <span className="truncate">Pause: {formatDuration(session.pausedDuration)}</span>
+                                  <span className="opacity-60 truncate text-[10px] md:text-xs">Pause: {formatDuration(session.pausedDuration)}</span>
                                 </>
                               )}
                             </div>

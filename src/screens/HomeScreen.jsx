@@ -312,7 +312,7 @@ export const HomeScreen = () => {
                 }`}
               >
                 <option value="">Aucun projet (optionnel)</option>
-                {projects.filter(p => !p.completed).map(project => (
+                {projects.filter(p => !p.completed && !p.paused).map(project => (
                   <option key={project.id} value={project.id}>
                     {project.name}
                   </option>

@@ -13,8 +13,9 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Créer le timestamp de début (milieu de journée par défaut)
-    const startDate = new Date(`${formData.date}T12:00:00`);
+    // Utiliser le jour seulement, pas d'heure (timestamp à minuit UTC)
+    const [year, month, day] = formData.date.split('-').map(Number);
+    const startDate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
     const start = startDate.getTime();
     const duration = formData.duration * 60; // convertir en secondes
     const end = start + (duration * 1000);
@@ -105,7 +106,7 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
           </div>
 
           {/* Projet (optionnel) */}
-          {projects.length > 0 && (
+          {projects.filter(p => !p.completed && !p.paused).length > 0 && (
             <div>
               <label className="block text-xs md:text-sm opacity-60 mb-2">Projet (optionnel)</label>
               <select
@@ -116,7 +117,7 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
                 }`}
               >
                 <option value="">Aucun projet</option>
-                {projects.map((project) => (
+                {projects.filter(p => !p.completed && !p.paused).map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
                   </option>

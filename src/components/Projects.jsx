@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp, Edit2, Save, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Trash2, Calendar, CheckCircle2, Circle, ChevronDown, ChevronUp, Edit2, Save, X, ArrowUp, ArrowDown, Pause, Play } from 'lucide-react';
 
 export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDeleteProject, onToggleProject, onUpdateProject }) => {
   const [showForm, setShowForm] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showPaused, setShowPaused] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', deadline: '', description: '' });
   const [expandedProject, setExpandedProject] = useState(null);
   const [newSubtask, setNewSubtask] = useState('');
@@ -198,7 +199,16 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
     return new Date(deadline).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
-  const activeProjects = projects.filter(p => !p.completed);
+  // Fonction pour mettre en pause / reprendre un projet
+  const togglePauseProject = async (projectId) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      await onUpdateProject(projectId, { paused: !project.paused });
+    }
+  };
+
+  const activeProjects = projects.filter(p => !p.completed && !p.paused);
+  const pausedProjects = projects.filter(p => p.paused && !p.completed);
   const completedProjects = projects.filter(p => p.completed);
 
   return (
@@ -472,14 +482,23 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
+                    onClick={() => togglePauseProject(project.id)}
+                    className="p-2 hover:bg-yellow-500/10 rounded-lg transition-colors text-yellow-500"
+                    title="Mettre en pause"
+                  >
+                    <Pause size={16} />
+                  </button>
+                  <button
                     onClick={() => startEditingProject(project)}
                     className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors text-blue-500"
+                    title="Modifier"
                   >
                     <Edit2 size={16} />
                   </button>
                   <button
                     onClick={() => onDeleteProject(project.id)}
                     className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500"
+                    title="Supprimer"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -487,6 +506,81 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Paused Projects */}
+      {pausedProjects.length > 0 && (
+        <div className="mb-4">
+          <button
+            onClick={() => setShowPaused(!showPaused)}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl mb-2 transition-colors ${
+              darkMode ? 'hover:bg-zinc-800' : 'hover:bg-zinc-200'
+            }`}
+          >
+            <h3 className="text-xs uppercase tracking-wider opacity-40">
+              En pause ({pausedProjects.length})
+            </h3>
+            {showPaused ? (
+              <ChevronUp size={16} className="opacity-40" />
+            ) : (
+              <ChevronDown size={16} className="opacity-40" />
+            )}
+          </button>
+
+          {showPaused && (
+            <div className="space-y-2 animate-fadeIn">
+              {pausedProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className={`p-4 rounded-xl ${
+                    darkMode ? 'bg-zinc-800/50 border-yellow-500/20' : 'bg-amber-50 border-yellow-300'
+                  } border-2`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Pause size={16} className="text-yellow-500" />
+                        <h3 className="font-medium text-sm md:text-base truncate">{project.name}</h3>
+                      </div>
+                      {project.description && (
+                        <p className="text-sm opacity-60 ml-6 mb-2">{project.description}</p>
+                      )}
+                      <div className="flex items-center gap-2 ml-6">
+                        <Calendar size={14} className={getDeadlineColor(project.deadline, false)} />
+                        <span className={`text-sm font-medium ${getDeadlineColor(project.deadline, false)}`}>
+                          {formatDeadline(project.deadline)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => togglePauseProject(project.id)}
+                        className="p-2 hover:bg-green-500/10 rounded-lg transition-colors text-green-500"
+                        title="Reprendre"
+                      >
+                        <Play size={16} />
+                      </button>
+                      <button
+                        onClick={() => startEditingProject(project)}
+                        className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors text-blue-500"
+                        title="Modifier"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => onDeleteProject(project.id)}
+                        className="p-2 hover:bg-red-500/10 rounded-lg transition-colors text-red-500"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
