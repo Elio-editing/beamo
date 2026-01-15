@@ -106,25 +106,27 @@ export const ManualSessionEntry = ({ darkMode, onAddSession, projects = [] }) =>
           </div>
 
           {/* Projet (optionnel) */}
-          {projects.filter(p => !p.completed && !p.paused).length > 0 && (
-            <div>
-              <label className="block text-xs md:text-sm opacity-60 mb-2">Projet (optionnel)</label>
-              <select
-                value={formData.projectId || ''}
-                onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
-                className={`w-full px-3 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
-                  darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
-                }`}
-              >
-                <option value="">Aucun projet</option>
-                {projects.filter(p => !p.completed && !p.paused).map((project) => (
+          <div>
+            <label className="block text-xs md:text-sm opacity-60 mb-2">Projet (optionnel)</label>
+            <select
+              value={formData.projectId || ''}
+              onChange={(e) => setFormData({ ...formData, projectId: e.target.value || null })}
+              className={`w-full px-3 md:px-4 py-2 rounded-xl outline-none text-sm md:text-base ${
+                darkMode ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-zinc-300'
+              }`}
+            >
+              <option value="">Aucun projet</option>
+              {projects.filter(p => !p.completed && !p.paused).length === 0 ? (
+                <option value="" disabled>Créez un projet d'abord</option>
+              ) : (
+                projects.filter(p => !p.completed && !p.paused).map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
                   </option>
-                ))}
-              </select>
-            </div>
-          )}
+                ))
+              )}
+            </select>
+          </div>
 
           {/* Date */}
           <div>
