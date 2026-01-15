@@ -94,20 +94,39 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
             <div className="w-6 md:w-8" /> {/* Space for day labels */}
             <div className="flex gap-0.5 md:gap-1">
               {weeks.map((week, weekIndex) => {
-                // Check if this week starts a new month
-                const firstDayOfWeek = week.find(d => d !== null);
-                if (!firstDayOfWeek) return <div key={weekIndex} className="h-2.5 md:h-3 mb-0.5 md:mb-1" />;
+                let monthToShow = null;
 
-                const prevWeek = weekIndex > 0 ? weeks[weekIndex - 1] : null;
-                const prevFirstDay = prevWeek ? prevWeek.find(d => d !== null) : null;
+                // Vérifier si cette semaine contient le début d'un nouveau mois
+                for (let i = 0; i < week.length; i++) {
+                  const day = week[i];
+                  if (!day) continue;
 
-                const showMonth = !prevFirstDay || prevFirstDay.month !== firstDayOfWeek.month;
+                  // Trouver le jour précédent dans toutes les semaines
+                  let prevDay = null;
+                  if (i > 0 && week[i - 1]) {
+                    prevDay = week[i - 1];
+                  } else if (weekIndex > 0) {
+                    // Chercher dans la semaine précédente
+                    for (let j = weeks[weekIndex - 1].length - 1; j >= 0; j--) {
+                      if (weeks[weekIndex - 1][j]) {
+                        prevDay = weeks[weekIndex - 1][j];
+                        break;
+                      }
+                    }
+                  }
+
+                  // Si c'est le premier jour ou un nouveau mois commence
+                  if (!prevDay || prevDay.month !== day.month) {
+                    monthToShow = monthLabels[day.month];
+                    break;
+                  }
+                }
 
                 return (
                   <div key={weekIndex} className="h-2.5 md:h-3 mb-0.5 md:mb-1">
-                    {showMonth && (
+                    {monthToShow && (
                       <div className="text-[10px] md:text-xs opacity-60 whitespace-nowrap">
-                        {monthLabels[firstDayOfWeek.month]}
+                        {monthToShow}
                       </div>
                     )}
                   </div>
