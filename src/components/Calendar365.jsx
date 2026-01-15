@@ -91,7 +91,7 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
         <div className="inline-block min-w-full">
           {/* Month labels */}
           <div className="flex gap-0.5 md:gap-1 mb-2">
-            <div className="w-6 md:w-8" /> {/* Space for day labels */}
+            <div className="w-5 md:w-6" /> {/* Space for day labels - matches day label width */}
             <div className="flex gap-0.5 md:gap-1">
               {weeks.map((week, weekIndex) => {
                 let monthToShow = null;
@@ -123,7 +123,7 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
                 }
 
                 return (
-                  <div key={weekIndex} className="h-2.5 md:h-3 mb-0.5 md:mb-1">
+                  <div key={weekIndex} className="w-2.5 md:w-3">
                     {monthToShow && (
                       <div className="text-[10px] md:text-xs opacity-60 whitespace-nowrap">
                         {monthToShow}
