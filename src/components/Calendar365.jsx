@@ -93,23 +93,26 @@ export const Calendar365 = ({ dailyStats, darkMode }) => {
           <div className="flex gap-0.5 md:gap-1 mb-2">
             <div className="w-6 md:w-8" /> {/* Space for day labels */}
             <div className="flex gap-0.5 md:gap-1">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-0.5 md:gap-1">
-                  {week.map((day, dayIndex) => {
-                    if (dayIndex === 0 && day) {
-                      const prevDay = weekIndex > 0 ? weeks[weekIndex - 1][0] : null;
-                      if (!prevDay || prevDay.month !== day.month) {
-                        return (
-                          <div key={`month-${weekIndex}`} className="text-[10px] md:text-xs opacity-60 h-2.5 md:h-3 mb-0.5 md:mb-1 whitespace-nowrap">
-                            {day.day <= 7 ? monthLabels[day.month] : ''}
-                          </div>
-                        );
-                      }
-                    }
-                    return null;
-                  })}
-                </div>
-              ))}
+              {weeks.map((week, weekIndex) => {
+                // Check if this week starts a new month
+                const firstDayOfWeek = week.find(d => d !== null);
+                if (!firstDayOfWeek) return <div key={weekIndex} className="h-2.5 md:h-3 mb-0.5 md:mb-1" />;
+
+                const prevWeek = weekIndex > 0 ? weeks[weekIndex - 1] : null;
+                const prevFirstDay = prevWeek ? prevWeek.find(d => d !== null) : null;
+
+                const showMonth = !prevFirstDay || prevFirstDay.month !== firstDayOfWeek.month;
+
+                return (
+                  <div key={weekIndex} className="h-2.5 md:h-3 mb-0.5 md:mb-1">
+                    {showMonth && (
+                      <div className="text-[10px] md:text-xs opacity-60 whitespace-nowrap">
+                        {monthLabels[firstDayOfWeek.month]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 

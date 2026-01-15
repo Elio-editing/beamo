@@ -631,6 +631,21 @@ export const Projects = ({ projects, sessions = [], darkMode, onAddProject, onDe
                     {project.description && (
                       <p className="text-sm opacity-60 ml-7 line-through">{project.description}</p>
                     )}
+                    {/* Statistiques du projet terminé */}
+                    {(() => {
+                      const hours = getProjectHours(project.id);
+                      if (hours.total > 0) {
+                        return (
+                          <div className="mt-2 ml-7 flex gap-3 text-xs">
+                            <span className="text-green-500 font-medium">{hours.deep.toFixed(1)}h Deep</span>
+                            <span className="opacity-20">•</span>
+                            <span className="text-purple-500 font-medium">{hours.shallow.toFixed(1)}h Shallow</span>
+                            <span className="opacity-20">•</span>
+                            <span className="opacity-60">{hours.total.toFixed(1)}h Total</span>
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                   <button
                     onClick={() => onDeleteProject(project.id)}
